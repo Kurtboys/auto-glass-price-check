@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Auto Glass Price Check | All-Star Auto Glass</title>
+<meta name="description" content="Enter your vehicle, the glass you need fixed, and your zip code to see what a great, good, and fair local price looks like, and when you're overpaying.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+
+<script>
+/* =====================================================================
+   SETTINGS — EDIT THESE BEFORE GOING LIVE
+   ===================================================================== */
+const CONFIG = {
+  businessName: "All-Star Auto Glass",
+
+  // Phone number for the Call and Text buttons. Change both lines together.
+  phoneDisplay: "(206) 255-7827",     // how the number is shown on the Call button
+  phoneDial:    "+12062557827",       // digits only with +1, used by the Call and Text links
+
+  // Logo image. If it fails to load, a text version of the logo is shown instead.
+  logoUrl: "https://callallstar.com/wp-content/uploads/2018/05/simplelogo-neg100.jpg",
+  websiteUrl: "https://callallstar.com/",
+
+  ctaHeadline: "If you want a great price, call or text us now!",
+
+  // true = model dropdown filled from the federal NHTSA vehicle database.
+  // false = visitors type their model (use only where outside lookups are blocked).
+  liveModelList: true
+};
+</script>
+
+<style>
+  :root {
+    --blue: #375FA0;
+    --blue-dark: #2A4A7F;
+    --blue-tint: #EEF2F9;
+    --red: #D8262F;
+    --green: #26A96C;
+    --green-dark: #1E8E5A;
+    --amber: #D99000;
+    --ink: #333333;
+    --body: #595959;
+    --muted: #7A7A7A;
+    --bg: #F9F9F9;
+    --card: #FFFFFF;
+    --line: #DADADA;
+    --great: var(--green);
+    --good: var(--blue);
+    --fair: var(--amber);
+    --over: var(--red);
+    --radius: 6px;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--body);
+    font-family: "Fira Sans", Arial, Helvetica, sans-serif;
+    font-size: 17px;
+    line-height: 1.5;
+  }
+  .wrap { max-width: 780px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+
+  /* Header */
+  .topbar { height: 6px; background: var(--blue); }
+  header.site { background: #fff; border-bottom: 1px solid var(--line); }
+  header.site .wrap { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-top: 10px; padding-bottom: 10px; }
+  .logo { display: inline-flex; align-items: center; text-decoration: none; }
+  .logo img { height: 56px; width: auto; display: block; }
+  .wordmark { display: inline-flex; flex-direction: column; align-items: center; line-height: 1; font-weight: 700; }
+  .wordmark .w1 { color: var(--blue); font-size: 24px; letter-spacing: 0.5px; font-style: italic; }
+  .wordmark .w2 { margin-top: 3px; background: var(--red); color: #fff; font-size: 12px; letter-spacing: 1px; padding: 3px 9px; border-radius: 10px; }
+  .head-phone { color: var(--blue); font-weight: 700; text-decoration: none; white-space: nowrap; font-size: 18px; }
+  .head-phone span { display: block; font-size: 12px; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; text-align: right; }
+
+  /* Hero */
+  .hero { background: var(--blue); color: #fff; padding: 34px 0 78px; }
+  .hero h1 { margin: 0 0 8px; font-size: clamp(27px, 5.2vw, 39px); line-height: 1.15; font-weight: 700; text-wrap: balance; }
+  .hero p { margin: 0; font-size: clamp(16px, 2.6vw, 19px); max-width: 600px; color: #E6ECF6; }
+
+  /* Form card */
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: 0 2px 10px rgba(0,0,0,0.06); }
+  .form-card { margin-top: -52px; padding: 22px; position: relative; }
+  .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+  .span-2 { grid-column: span 2; }
+  .span-3 { grid-column: span 3; }
+  label { display: block; font-size: 13px; font-weight: 700; color: var(--ink); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 5px; }
+  select, input[type="text"] {
+    width: 100%; height: 48px; padding: 0 12px;
+    font: inherit; color: var(--ink);
+    background: #fff; border: 1px solid #BFBFBF; border-radius: 4px;
+    appearance: none; -webkit-appearance: none;
+  }
+  select {
+    padding-right: 34px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23595959' stroke-width='2'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 12px center;
+  }
+  select:disabled { background-color: #F2F2F2; color: var(--muted); }
+  select:focus-visible, input:focus-visible, button:focus-visible, a:focus-visible { outline: 3px solid rgba(55,95,160,0.45); outline-offset: 2px; }
+  .hint { font-size: 13px; color: var(--muted); margin-top: 4px; min-height: 18px; }
+  .error { color: var(--red); font-weight: 500; font-size: 15px; margin: 12px 0 0; display: none; }
+  .error.show { display: block; }
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    min-height: 52px; padding: 12px 22px;
+    font: inherit; font-weight: 700; font-size: 16px; text-transform: uppercase; letter-spacing: 0.8px;
+    border: 0; border-radius: 4px; cursor: pointer; text-decoration: none;
+  }
+  .btn-primary { background: var(--green); color: #fff; width: 100%; margin-top: 18px; }
+  .btn-primary:hover { background: var(--green-dark); }
+  [hidden] { display: none !important; }
+
+  /* Results */
+  #results { margin-top: 26px; scroll-margin-top: 12px; }
+  .res-head { padding: 20px 22px 4px; }
+  .eyebrow { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--blue); margin: 0 0 4px; }
+  .res-head h2 { margin: 0; color: var(--ink); font-size: clamp(21px, 4vw, 26px); line-height: 1.2; font-weight: 700; }
+  .res-head .sub { margin: 4px 0 0; font-size: 15px; color: var(--muted); }
+
+  .opts { margin: 16px 22px 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+  .adas { padding: 14px 16px; background: var(--blue-tint); border-radius: var(--radius); min-width: 0; }
+  .adas-q { font-weight: 700; color: var(--ink); font-size: 16px; margin: 0 0 4px; }
+  .adas-help { font-size: 14px; margin: 0 0 10px; }
+  .seg { display: inline-flex; border: 1px solid var(--blue); border-radius: 4px; overflow: hidden; }
+  .seg button { font: inherit; font-weight: 700; font-size: 15px; padding: 9px 16px; min-height: 44px; background: #fff; color: var(--blue); border: 0; cursor: pointer; }
+  .seg button + button { border-left: 1px solid var(--blue); }
+  .seg button[aria-pressed="true"] { background: var(--blue); color: #fff; }
+
+  .tiers { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; padding: 18px 22px 6px; }
+  .tier { border: 1px solid var(--line); border-top: 6px solid var(--c); border-radius: var(--radius); padding: 14px 12px 14px; background: #fff; min-width: 0; }
+  .tier .name { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: var(--c); }
+  .tier .price { font-size: clamp(19px, 2.6vw, 22px); font-weight: 700; color: var(--ink); line-height: 1.25; margin: 6px 0 6px; font-variant-numeric: tabular-nums; }
+  .tier .price span { white-space: nowrap; }
+  .tier .price small { font-size: 14px; font-weight: 500; color: var(--muted); }
+  .tier .desc { font-size: 14px; line-height: 1.4; margin: 0; }
+  .tier.great { --c: var(--great); }
+  .tier.good { --c: var(--good); }
+  .tier.fair { --c: var(--fair); }
+  .tier.over { --c: var(--over); }
+
+  .scale { padding: 12px 22px 0; }
+  .scale-bar { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; height: 12px; border-radius: 6px; overflow: hidden; }
+  .scale-bar i:nth-child(1) { background: var(--great); }
+  .scale-bar i:nth-child(2) { background: var(--good); }
+  .scale-bar i:nth-child(3) { background: var(--fair); }
+  .scale-bar i:nth-child(4) { background: var(--over); }
+  .scale-ticks { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; font-size: 14px; font-weight: 700; color: var(--ink); margin-top: 4px; font-variant-numeric: tabular-nums; }
+  .scale-ticks span { text-align: right; }
+  .scale-ticks b { display: inline-block; transform: translateX(50%); }
+
+  .incl { margin: 16px 22px 0; padding: 12px 16px; border: 1px solid var(--line); border-left: 5px solid var(--blue); border-radius: var(--radius); background: #fff; font-size: 15px; color: var(--ink); }
+  .incl p { margin: 0; }
+  .incl p + p { margin-top: 4px; color: var(--body); font-size: 14px; }
+  .notes { padding: 14px 22px 0; }
+  .notes p { margin: 0 0 8px; font-size: 15px; }
+  .notes .split { color: var(--ink); }
+
+  .cta { margin: 16px 22px 0; padding: 22px 18px; background: var(--blue); border-radius: var(--radius); text-align: center; color: #fff; }
+  .cta h3 { margin: 0 0 14px; font-size: clamp(20px, 4vw, 25px); line-height: 1.25; font-weight: 700; text-wrap: balance; }
+  .cta-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .cta .btn { flex: 1 1 220px; max-width: 300px; }
+  .btn-call { background: var(--green); color: #fff; }
+  .btn-call:hover { background: var(--green-dark); }
+  .btn-text { background: #fff; color: var(--blue); }
+  .btn-text:hover { background: var(--blue-tint); }
+  .cta .ins { margin: 12px 0 0; font-size: 14px; color: #E6ECF6; }
+
+  details.how { margin: 16px 22px 0; border-top: 1px solid var(--line); padding: 12px 0 0; font-size: 15px; }
+  details.how summary { cursor: pointer; font-weight: 700; color: var(--blue); }
+  details.how ul { margin: 8px 0 0; padding-left: 20px; }
+  details.how li { margin-bottom: 5px; }
+  .fine { padding: 12px 22px 20px; font-size: 13px; color: var(--muted); margin: 0; }
+
+  footer.site { margin-top: 30px; background: var(--blue); color: #E6ECF6; font-size: 14px; padding: 16px 0; text-align: center; }
+  footer.site a { color: #fff; }
+
+  @media (max-width: 680px) {
+    body { font-size: 16px; }
+    .grid { grid-template-columns: 1fr; }
+    .span-2, .span-3 { grid-column: auto; }
+    .form-card { padding: 18px 16px; }
+    .tiers { grid-template-columns: 1fr 1fr; padding-left: 16px; padding-right: 16px; }
+    .res-head, .scale, .notes { padding-left: 16px; padding-right: 16px; }
+    .opts, .incl, .cta, details.how { margin-left: 16px; margin-right: 16px; }
+    .fine { padding-left: 16px; padding-right: 16px; }
+    .head-phone span { display: none; }
+    .logo img { height: 46px; }
+  }
+  @media (max-width: 360px) {
+    .tiers { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar"></div>
+<header class="site">
+  <div class="wrap">
+    <a class="logo" id="logoLink" href="#" aria-label="All-Star Auto Glass home">
+      <img id="logoImg" alt="All-Star Auto Glass" hidden>
+      <span class="wordmark" id="wordmark"><span class="w1">ALL-STAR</span><span class="w2">AUTO GLASS</span></span>
+    </a>
+    <a class="head-phone" id="headPhone" href="#"><span>Call or text</span><b id="headPhoneNum"></b></a>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <h1>Don't overpay for your auto glass!</h1>
+    <p>Tell us your vehicle, what needs fixing, and your zip code. We'll show you what a great, good, and fair price looks like in your area, and when a quote is too high.</p>
+  </div>
+</section>
+
+<main class="wrap">
+  <form class="card form-card" id="form" novalidate>
+    <div class="grid">
+      <div>
+        <label for="year">Year</label>
+        <select id="year" required><option value="">Select year</option></select>
+      </div>
+      <div>
+        <label for="make">Make</label>
+        <select id="make" required><option value="">Select make</option></select>
+      </div>
+      <div>
+        <label for="model">Model</label>
+        <select id="model" required disabled><option value="">Pick year and make first</option></select>
+        <input type="text" id="modelText" placeholder="Type your model" autocomplete="off" hidden>
+        <div class="hint" id="modelHint"></div>
+      </div>
+      <div id="bodyWrap" class="span-3" hidden>
+        <label for="body">Vehicle type</label>
+        <select id="body">
+          <option value="car">Car (sedan, coupe, hatchback, wagon)</option>
+          <option value="suv">SUV or crossover</option>
+          <option value="truck">Pickup truck</option>
+          <option value="van">Van or minivan</option>
+        </select>
+      </div>
+      <div class="span-2">
+        <label for="service">What needs to be fixed?</label>
+        <select id="service" required>
+          <option value="">Select a service</option>
+          <option value="windshield">Windshield replacement</option>
+          <option value="chip">Rock chip repair</option>
+          <option value="door">Door glass (side window)</option>
+          <option value="back">Back glass (rear window)</option>
+          <option value="quarter">Quarter or vent glass</option>
+          <option value="sunroof">Sunroof / moonroof glass</option>
+          <option value="pano">Panoramic roof glass</option>
+          <option value="adas">ADAS camera recalibration only</option>
+        </select>
+      </div>
+      <div>
+        <label for="zip">Zip code</label>
+        <input type="text" id="zip" inputmode="numeric" pattern="[0-9]{5}" maxlength="5" placeholder="e.g. 98134" autocomplete="postal-code" required>
+      </div>
+    </div>
+    <p class="error" id="error" role="alert"></p>
+    <button class="btn btn-primary" type="submit">Check my price</button>
+  </form>
+
+  <section class="card" id="results" hidden aria-live="polite">
+    <div class="res-head">
+      <p class="eyebrow" id="resService"></p>
+      <h2 id="resVehicle"></h2>
+      <p class="sub" id="resPlace"></p>
+    </div>
+
+    <div class="opts" id="opts" hidden>
+      <div class="adas" id="glassBox" hidden>
+        <p class="adas-q">Which glass is your quote for?</p>
+        <p class="adas-help" id="glassHelp"></p>
+        <div class="seg" role="group" aria-label="Glass type">
+          <button type="button" id="glassAfter" aria-pressed="true">Aftermarket</button>
+          <button type="button" id="glassOem" aria-pressed="false">Genuine (OEM)</button>
+        </div>
+      </div>
+      <div class="adas" id="adasBox" hidden>
+        <p class="adas-q">Is there a camera behind your rearview mirror?</p>
+        <p class="adas-help" id="adasHelp"></p>
+        <div class="seg" role="group" aria-label="Camera behind rearview mirror">
+          <button type="button" id="adasYes" aria-pressed="false">Yes</button>
+          <button type="button" id="adasNo" aria-pressed="false">No</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="tiers">
+      <div class="tier great"><div class="name">Great price</div><div class="price" id="pGreat"></div><p class="desc">About 15% or more below typical. Confirm what's included and the warranty.</p></div>
+      <div class="tier good"><div class="name">Good price</div><div class="price" id="pGood"></div><p class="desc">Below the typical price for this job.</p></div>
+      <div class="tier fair"><div class="name">Fair price</div><div class="price" id="pFair"></div><p class="desc">The typical price, up to about 25% above it.</p></div>
+      <div class="tier over"><div class="name">Likely overpaying</div><div class="price" id="pOver"></div><p class="desc">More than about 25% above typical for the same glass and services. Get a second quote.</p></div>
+    </div>
+
+    <div class="scale" aria-hidden="true">
+      <div class="scale-bar"><i></i><i></i><i></i><i></i></div>
+      <div class="scale-ticks"><span><b id="t1"></b></span><span><b id="t2"></b></span><span><b id="t3"></b></span><span></span></div>
+    </div>
+
+    <div class="incl">
+      <p id="inclLine"></p>
+      <p id="basisLine"></p>
+    </div>
+
+    <div class="notes" id="notes"></div>
+
+    <div class="cta">
+      <h3 id="ctaHeadline"></h3>
+      <div class="cta-btns">
+        <a class="btn btn-call" id="callBtn" href="#">Call <span id="callNum"></span></a>
+        <a class="btn btn-text" id="textBtn" href="#">Text us</a>
+      </div>
+      <p class="ins">Using insurance? You may only owe your deductible. We work with all major insurers.</p>
+    </div>
+
+    <details class="how">
+      <summary>How we estimate these prices</summary>
+      <ul>
+        <li><b>Starting point:</b> national averages from a 2026 analysis of 10,000 VIN-based windshield quotes by Glass.com ($337 without a driver-assist camera, $507 with one, $259 for recalibration), plus published price ranges for other glass.</li>
+        <li><b>Your vehicle:</b> we adjust for body style, brand, model year, and whether it has a driver-assist camera.</li>
+        <li><b>Glass type:</b> aftermarket glass is the default because it is what most shops quote. Genuine (OEM) windshield glass is priced about 50% higher on a plain windshield and about 80% higher on one with a camera bracket, based on a national chain's OEM upcharges and our own OEM jobs.</li>
+        <li><b>Recalibration:</b> checked against rates published by Seattle-area glass shops ($250 to $450 depending on the method) and AAA's $360 national figure.</li>
+        <li><b>Your area:</b> in the greater Puget Sound area the price level is set from local evidence: a national chain's online quotes for Seattle, the Puget Sound Consumers' Checkbook survey of area shops, and our own invoices. Elsewhere we adjust national figures using 2024 regional price data from the U.S. Bureau of Economic Analysis.</li>
+        <li><b>The four ranges:</b> "Fair" runs from the typical price to about 25% above it. "Good" is up to about 15% below typical, "Great" is lower than that, and "Likely overpaying" starts more than about 25% above typical. Cutoffs are rounded to the nearest $5. Compare them with the pre-tax price on your quote.</li>
+        <li><b>Reality check:</b> we compared these estimates with 6,057 paid cash invoices from our Washington shops (January to November 2026). The typical estimate was within 15% of the actual price on 71% of jobs and within 25% on 85%, and our own prices ran a median 10% below it. We also compared it with a national chain's online cash quotes for seven vehicles in Seattle. That chain's cheapest service tier averaged 6% below our typical figure before its fees and add-ons, ranging from 16% below to 7% above. On door and back glass, the same chain's quotes for four vehicles ran 11% to 76% above our typical figure, and our typical figure sits inside the $150 to $400 range the Puget Sound Consumers' Checkbook reports for most side and rear windows.</li>
+        <li><b>What we can't see:</b> options such as a heads-up display, heated glass, or acoustic glass, which only a VIN lookup confirms. That is why this is a range and not a quote.</li>
+      </ul>
+    </details>
+    <p class="fine">Estimates are out-of-pocket prices before tax. They come from national data adjusted for your vehicle and area, not from a survey of shops in your zip code. Compare quotes on the same basis: same glass type, with installation and recalibration included. Your exact price depends on your vehicle's options, which we confirm by VIN when you call or text.</p>
+  </section>
+</main>
+
+<footer class="site">
+  <div class="wrap">&copy; <span id="yr"></span> <span id="footName"></span> &middot; <a id="footLink" href="#">Visit our website</a></div>
+</footer>
+
+<script>
+/* =====================================================================
+   PRICING MODEL
+   Dollar figures are national typical cash prices for installed
+   aftermarket glass, before the vehicle and local adjustments.
+   The method and sources are summarized in the "How we estimate"
+   section of the page.
+   ===================================================================== */
+const SERVICES = {
+  windshield: { label: "Windshield replacement",          base: 340,  tier: { premium: 1.05, luxury: 1.2, exotic: 3.0 }, body: { car: 1, suv: 1.02, truck: 0.97, van: 1.0 } },
+  chip:       { label: "Rock chip repair",                base: 90,   flat: true },
+  door:       { label: "Door glass replacement",          base: 270,  tier: { premium: 1.0,  luxury: 1.05, exotic: 2.6 }, body: { car: 1, suv: 1.05, truck: 1.04, van: 1.03 } },
+  back:       { label: "Back glass replacement",          base: 335,  tier: { premium: 1.05, luxury: 1.25, exotic: 2.6 }, body: { car: 1, suv: 1.12, truck: 1.35, van: 1.05 } },
+  quarter:    { label: "Quarter or vent glass replacement", base: 315, tier: { premium: 1.1,  luxury: 1.2,  exotic: 2.6 }, body: { car: 1, suv: 1.08, truck: 0.95, van: 1.25 } },
+  sunroof:    { label: "Sunroof / moonroof glass replacement", base: 600, tier: { premium: 1.15, luxury: 1.35, exotic: 2.2 }, body: { car: 1, suv: 1.05, truck: 1.05, van: 1.05 } },
+  pano:       { label: "Panoramic roof glass replacement", base: 950, tier: { premium: 1.05, luxury: 1.1, exotic: 2.0 }, body: { car: 1, suv: 1.05, truck: 1.05, van: 1.05 } },
+  adas:       { label: "ADAS camera recalibration",       base: 285,  tier: { premium: 1.05, luxury: 1.15, exotic: 1.4 }, body: { car: 1, suv: 1, truck: 1, van: 1 } }
+};
+
+// Where each tier starts, relative to the typical local price.
+const GREAT_BELOW = 0.85;   // under 85% of typical = great
+const OVER_ABOVE  = 1.25;   // over 125% of typical = likely overpaying
+const ADAS_GLASS_FACTOR = 1.3;   // camera-equipped windshields cost more than plain ones
+
+// Base prices are for aftermarket glass. Genuine (OEM) glass costs more.
+const GLASS_SERVICES = ["windshield", "door", "back", "quarter", "sunroof", "pano"];
+// Genuine windshields with a camera bracket carry a much bigger premium than plain ones.
+const OEM_WINDSHIELD = { camera: 1.8, plain: 1.5 };
+const OEM_FACTOR = {
+  other:      { mainstream: 1.3, premium: 1.4,  luxury: 1.5 }
+};
+const LOCAL_SENSITIVITY = 0.6;   // share of the price that moves with local cost levels (labor, overhead)
+
+// Markets where the price level is set from local evidence instead of the federal
+// cost index. [first zip3, last zip3, factor vs national, name]
+// Puget Sound: set in November 2026 from local quotes, a local shop survey, and completed jobs.
+const LOCAL_MARKETS = [
+  [980, 985, 1.13, "Puget Sound"]
+];
+
+// Brand tiers. Anything not listed is "mainstream".
+const MAKE_TIER = {
+  "Acura": "premium", "INFINITI": "premium", "Lexus": "premium", "Volvo": "premium", "Lincoln": "premium",
+  "Cadillac": "premium", "Genesis": "premium", "MINI": "premium", "Saab": "premium", "Hummer": "premium",
+  "BMW": "luxury", "Mercedes-Benz": "luxury", "Audi": "luxury", "Land Rover": "luxury", "Jaguar": "luxury",
+  "Tesla": "luxury", "Porsche": "luxury", "Alfa Romeo": "luxury", "Rivian": "luxury", "Lucid": "luxury",
+  "Polestar": "luxury", "Maserati": "luxury",
+  "Bentley": "exotic", "Ferrari": "exotic", "Lamborghini": "exotic", "Rolls-Royce": "exotic",
+  "Aston Martin": "exotic", "McLaren": "exotic"
+};
+
+// Model year from which a forward camera is on most trims (our estimate, by brand).
+const ADAS_LIKELY_FROM = {
+  "Tesla": 2015, "Volvo": 2017, "Mercedes-Benz": 2018, "Toyota": 2018, "Lexus": 2018, "Acura": 2019,
+  "Genesis": 2019, "Land Rover": 2019, "Jaguar": 2019, "Honda": 2020, "Subaru": 2020, "Nissan": 2020,
+  "INFINITI": 2020, "Mazda": 2020, "BMW": 2020, "Audi": 2020, "Lincoln": 2020, "Porsche": 2020,
+  "Hyundai": 2021, "Kia": 2021, "Ford": 2021, "Volkswagen": 2021, "Buick": 2021, "Cadillac": 2021,
+  "Chrysler": 2021, "Polestar": 2021
+};
+const ADAS_LIKELY_DEFAULT = 2022;
+// Makes whose cameras recalibrate themselves while driving: no separate recalibration charge.
+const SELF_CALIBRATING = ["Tesla"];
+const ADAS_POSSIBLE_FROM = 2014;
+
+// Measured from completed windshield jobs (2026): the first model year from which
+// most jobs for that make or model needed camera recalibration. 9999 = never the majority.
+// Model keys are "Make|model" with the model lowercased and stripped to letters and digits.
+// These override the brand estimates above.
+const CAMERA_FROM_MAKE = {
+  "Audi": 2018, "Chevrolet": 2021, "Ford": 2020, "Honda": 2019, "Hyundai": 2019, "INFINITI": 2019, "Jeep": 2024, "Kia": 2020, "Land Rover": 2017, "Lexus": 2019, "Mazda": 2017, "Nissan": 2021, "Porsche": 2017, "Ram": 2022, "Subaru": 2018, "Toyota": 2017, "Volvo": 2018
+};
+const CAMERA_FROM_MODEL = {
+  "Acura|mdx": 2014, "Acura|rdx": 2020, "Audi|a4": 2019, "Audi|q5": 2018, "BMW|x5": 2015,
+  "Chevrolet|colorado": 2023, "Chevrolet|equinox": 2018, "Chevrolet|silverado1500": 2023,
+  "Chevrolet|silveradoc1500": 9999, "Chevrolet|suburban": 2015, "Chevrolet|tahoe": 2016,
+  "Dodge|grandcaravan": 9999, "Ford|bronco": 2021, "Ford|broncosport": 2022, "Ford|escape": 2020,
+  "Ford|explorer": 2020, "Ford|f150": 2019, "Ford|f250": 2018, "Ford|f350": 2017, "Ford|focus": 9999,
+  "Ford|fusion": 2019, "Ford|mache": 2021, "Ford|maverick": 2022, "Ford|mustang": 2020, "Ford|ranger": 2021,
+  "Ford|transit1008roof": 2020, "Ford|transit1102roof": 2019, "Ford|transit832roof": 2020,
+  "Ford|transitconnectpv": 2019, "GMC|sierra1500": 2021, "GMC|yukon": 2016, "Honda|accord": 2018,
+  "Honda|civic": 2019, "Honda|crv": 2017, "Honda|fit": 9999, "Honda|hrv": 2023, "Honda|odyssey": 2014,
+  "Honda|pilot": 2019, "Hyundai|elantra": 2020, "Hyundai|kona": 2020, "Hyundai|santafe": 2019,
+  "Hyundai|sonata": 2020, "Hyundai|tucson": 2022, "Jeep|cherokee": 9999, "Jeep|gladiator": 9999,
+  "Jeep|grandcherokee": 2023, "Jeep|wrangler": 2024, "Kia|niro": 2019, "Kia|soul": 2021, "Kia|sportage": 2023,
+  "Kia|telluride": 2020, "Lexus|gx460": 2021, "Lexus|rx350": 2017, "Mazda|3": 2017, "Mazda|cx30": 2020,
+  "Mazda|cx5": 2017, "Mercedes-Benz|gleclass": 2020, "Nissan|altima": 9999, "Nissan|rogue": 2019,
+  "Porsche|macan": 2018, "Ram|1500": 2020, "Subaru|ascent": 2019, "Subaru|crosstrek": 2019,
+  "Subaru|forester": 2017, "Subaru|impreza": 2020, "Subaru|legacy": 2018, "Subaru|outback": 2017,
+  "Toyota|4runner": 2020, "Toyota|camry": 2018, "Toyota|corolla": 2018, "Toyota|grandhighlander": 2024,
+  "Toyota|highlander": 2016, "Toyota|prius": 2017, "Toyota|rav4": 2017, "Toyota|sienna": 2018,
+  "Toyota|tacoma": 2018, "Toyota|tundra": 2021, "Volkswagen|atlas": 2018, "Volkswagen|golf": 9999,
+  "Volkswagen|golfgti": 2022, "Volkswagen|jetta": 9999, "Volkswagen|tiguan": 2021, "Volvo|xc90": 2018
+};
+const normModel = m => (m || "").toLowerCase().replace(/f series |pickup|hybrid|plug-in|phev|prime|\bev\b/g, "").replace(/[^a-z0-9]/g, "");
+function cameraFromYear(make, model) {
+  const key = normModel(model);
+  if (key) {
+    const exact = CAMERA_FROM_MODEL[make + "|" + key];
+    if (exact !== undefined) return exact;
+    const near = Object.keys(CAMERA_FROM_MODEL).find(k => k.startsWith(make + "|") && key.length >= 4 &&
+      (k.slice(make.length + 1).startsWith(key) || key.startsWith(k.slice(make.length + 1))));
+    if (near) return CAMERA_FROM_MODEL[near];
+  }
+  return CAMERA_FROM_MAKE[make] ?? ADAS_LIKELY_FROM[make] ?? ADAS_LIKELY_DEFAULT;
+}
+
+// Specific models whose windshields run well above or below their class.
+const WINDSHIELD_MODEL_ADJ = [
+  [/model x/i, 1.9], [/cybertruck/i, 2.0], [/corvette/i, 1.6],
+  [/model y/i, 1.25], [/model 3/i, 1.15], [/model s/i, 1.3],
+  [/wrangler|gladiator/i, 0.85], [/sprinter|transit(?! connect)|promaster(?! city)/i, 1.25]
+];
+
+const VAN_RE = /sienna|odyssey|pacifica|caravan|town (&|and) country|sedona|carnival|quest|transit|sprinter|promaster|express|savana|metris|\bnv\d|\bnv\b|e-\d50|econoline|voyager|entourage|routan|venture|uplander|freestar|windstar|silhouette|previa|astro|safari|\bmpv\b|\bid\. ?buzz/i;
+
+const MAKES = ["Acura","Alfa Romeo","Aston Martin","Audi","Bentley","BMW","Buick","Cadillac","Chevrolet","Chrysler","Dodge","Ferrari","FIAT","Ford","Genesis","GMC","Honda","Hummer","Hyundai","INFINITI","Isuzu","Jaguar","Jeep","Kia","Lamborghini","Land Rover","Lexus","Lincoln","Lucid","Maserati","Mazda","McLaren","Mercedes-Benz","Mercury","MINI","Mitsubishi","Nissan","Oldsmobile","Plymouth","Polestar","Pontiac","Porsche","Ram","Rivian","Rolls-Royce","Saab","Saturn","Scion","smart","Subaru","Suzuki","Tesla","Toyota","Volkswagen","Volvo"];
+
+/* ---------------------------------------------------------------------
+   LOCAL COST DATA
+   State figures: U.S. Bureau of Economic Analysis, Regional Price
+   Parities, All Items, 2024 (100 = national average).
+   --------------------------------------------------------------------- */
+const STATE_RPP = { AL:88.8, AK:102.4, AZ:100.7, AR:86.9, CA:110.7, CO:103.1, CT:103.6, DE:99.8, DC:109.9, FL:103.4, GA:96.3, HI:110.0, ID:95.5, IL:100.0, IN:93.3, IA:87.8, KS:90.1, KY:90.2, LA:88.2, ME:97.1, MD:105.0, MA:105.8, MI:96.2, MN:98.6, MS:87.0, MO:90.8, MT:94.6, NE:90.1, NV:100.0, NH:104.2, NJ:108.8, NM:92.2, NY:107.9, NC:94.3, ND:89.0, OH:92.8, OK:87.8, OR:103.4, PA:97.6, RI:102.3, SC:93.7, SD:88.6, TN:91.9, TX:97.1, UT:98.9, VT:98.0, VA:101.1, WA:107.0, WV:89.5, WI:94.1, WY:92.7 };
+
+// First three zip digits -> state. [from, to, state]
+const ZIP3_STATE = [[5,5,"NY"],[10,27,"MA"],[28,29,"RI"],[30,38,"NH"],[39,49,"ME"],[50,59,"VT"],[60,69,"CT"],[70,89,"NJ"],[100,149,"NY"],[150,196,"PA"],[197,199,"DE"],[200,200,"DC"],[201,201,"VA"],[202,205,"DC"],[206,219,"MD"],[220,246,"VA"],[247,268,"WV"],[270,289,"NC"],[290,299,"SC"],[300,319,"GA"],[320,349,"FL"],[350,369,"AL"],[370,385,"TN"],[386,397,"MS"],[398,399,"GA"],[400,427,"KY"],[430,459,"OH"],[460,479,"IN"],[480,499,"MI"],[500,528,"IA"],[530,549,"WI"],[550,567,"MN"],[569,569,"DC"],[570,577,"SD"],[580,588,"ND"],[590,599,"MT"],[600,629,"IL"],[630,658,"MO"],[660,679,"KS"],[680,693,"NE"],[700,714,"LA"],[716,729,"AR"],[730,732,"OK"],[733,733,"TX"],[734,749,"OK"],[750,799,"TX"],[800,816,"CO"],[820,831,"WY"],[832,838,"ID"],[840,847,"UT"],[850,865,"AZ"],[870,884,"NM"],[885,885,"TX"],[889,898,"NV"],[900,961,"CA"],[967,968,"HI"],[970,979,"OR"],[980,994,"WA"],[995,999,"AK"]];
+
+// Metro-level overrides by first three zip digits, because big metros run well
+// above or below their state average. APPROXIMATE (our estimates from BEA metro
+// figures) — adjust freely, especially for your own markets. [from, to, index]
+const ZIP3_METRO = [
+  [980,984,112],  // Seattle-Tacoma-Everett
+  [985,985,104],  // Olympia
+  [986,986,105],  // Vancouver WA
+  [988,989,98],   // Wenatchee, Yakima
+  [990,992,100],  // Spokane
+  [993,994,98],   // Tri-Cities, Clarkston
+  [970,972,106],  // Portland
+  [940,951,117],  // SF Bay Area
+  [900,918,114],[926,928,114],  // Los Angeles, Orange County
+  [919,921,114],  // San Diego
+  [956,958,105],  // Sacramento
+  [100,119,113],[70,79,113],    // New York City metro
+  [120,149,97],   // Upstate New York
+  [18,24,110],    // Boston
+  [200,205,110],[208,209,110],[220,223,110],[201,201,110],  // Washington DC metro
+  [600,608,103],[609,629,92],   // Chicago, downstate Illinois
+  [330,334,110],  // Miami-Fort Lauderdale
+  [800,805,106],  // Denver
+  [190,194,103],[150,152,95],   // Philadelphia, Pittsburgh
+  [750,753,102],[760,762,102],  // Dallas-Fort Worth
+  [770,775,100],  // Houston
+  [300,303,100],  // Atlanta
+  [850,853,103],  // Phoenix
+  [550,555,102],  // Minneapolis-St. Paul
+  [480,483,98]    // Detroit
+];
+
+/* ---------------------------------------------------------------------
+   Pricing functions
+   --------------------------------------------------------------------- */
+function inRanges(table, n) {
+  for (const [a, b, v] of table) if (n >= a && n <= b) return v;
+  return null;
+}
+function localFactor(zip) {
+  const z3 = parseInt(zip.slice(0, 3), 10);
+  const state = inRanges(ZIP3_STATE, z3);
+  if (!state) return null;
+  const index = inRanges(ZIP3_METRO, z3) ?? STATE_RPP[state] ?? 100;
+  const market = LOCAL_MARKETS.find(([a, b]) => z3 >= a && z3 <= b);
+  if (market) return { state, index, factor: market[2], market: market[3] };
+  return { state, index, factor: 1 + LOCAL_SENSITIVITY * (index - 100) / 100 };
+}
+function yearFactor(service, year) {
+  const newest = new Date().getFullYear() - 1;   // newest model years: little aftermarket glass yet
+  if (service === "chip" || service === "adas") return 1;
+  if (service === "windshield") {
+    if (year >= newest) return 1.15;
+    if (year >= 2008) return 1;
+    if (year >= 1996) return 0.95;
+    return 1.05;
+  }
+  if (year >= newest) return 1.1;
+  if (year < 2000) return 1.1;
+  return 1;
+}
+function adasStatus(make, year, model) {
+  const likelyFrom = cameraFromYear(make, model);
+  if (year >= likelyFrom) return "likely";
+  if (year >= ADAS_POSSIBLE_FROM) return "possible";
+  return "unlikely";
+}
+function typicalPrice(serviceKey, v, local) {
+  const s = SERVICES[serviceKey];
+  let p = s.base;
+  if (!s.flat) {
+    const tier = MAKE_TIER[v.make] || "mainstream";
+    p *= (s.tier[tier] || 1) * (s.body[v.body] || 1) * yearFactor(serviceKey, v.year);
+    if (serviceKey === "windshield") {
+      for (const [re, m] of WINDSHIELD_MODEL_ADJ) if (re.test(v.model)) { p *= m; break; }
+    }
+  }
+  return p * local.factor;
+}
+const round5 = n => Math.round(n / 5) * 5;
+const money = n => "$" + n.toLocaleString("en-US");
+
+function estimate(serviceKey, v, local, hasCamera, oem) {
+  let glass = typicalPrice(serviceKey, v, local);
+  const tier = MAKE_TIER[v.make] || "mainstream";
+  if (oem && tier !== "exotic" && GLASS_SERVICES.includes(serviceKey)) {
+    glass *= serviceKey === "windshield" ? (hasCamera ? OEM_WINDSHIELD.camera : OEM_WINDSHIELD.plain) : OEM_FACTOR.other[tier];
+  }
+  let cal = 0;
+  if (serviceKey === "windshield" && hasCamera) {
+    glass *= ADAS_GLASS_FACTOR;
+    if (!SELF_CALIBRATING.includes(v.make)) cal = typicalPrice("adas", v, local);
+  }
+  const typical = glass + cal;
+  // Cutoffs are taken from the rounded typical price, so the percentages on screen hold.
+  let mid = round5(typical);
+  let great = round5(mid * GREAT_BELOW);
+  let over = round5(mid * OVER_ABOVE);
+  if (mid <= great) mid = great + 5;
+  if (over <= mid) over = mid + 5;
+  return {
+    great, mid, over,
+    glassLow: round5(glass * GREAT_BELOW), glassHigh: round5(glass * OVER_ABOVE),
+    calLow: round5(cal * GREAT_BELOW), calHigh: round5(cal * OVER_ABOVE),
+    hasCal: cal > 0,
+    selfCal: serviceKey === "windshield" && hasCamera && SELF_CALIBRATING.includes(v.make)
+  };
+}
+
+/* ---------------------------------------------------------------------
+   Page wiring
+   --------------------------------------------------------------------- */
+const $ = id => document.getElementById(id);
+const els = {
+  form: $("form"), year: $("year"), make: $("make"), model: $("model"), modelText: $("modelText"),
+  modelHint: $("modelHint"), bodyWrap: $("bodyWrap"), body: $("body"), service: $("service"), zip: $("zip"),
+  error: $("error"), results: $("results")
+};
+let manualModel = false;
+let modelReq = 0;
+let current = null;   // last submitted lookup
+
+// Branding and contact links
+(function initBrand() {
+  $("headPhoneNum").textContent = CONFIG.phoneDisplay;
+  $("headPhone").href = "tel:" + CONFIG.phoneDial;
+  $("callNum").textContent = CONFIG.phoneDisplay;
+  $("callBtn").href = "tel:" + CONFIG.phoneDial;
+  $("ctaHeadline").textContent = CONFIG.ctaHeadline;
+  $("logoLink").href = CONFIG.websiteUrl;
+  $("footLink").href = CONFIG.websiteUrl;
+  $("footName").textContent = CONFIG.businessName;
+  $("yr").textContent = new Date().getFullYear();
+  if (CONFIG.logoUrl) {
+    const img = $("logoImg");
+    img.onload = () => { img.hidden = false; $("wordmark").hidden = true; };
+    img.onerror = () => { img.hidden = true; $("wordmark").hidden = false; };
+    img.src = CONFIG.logoUrl;
+  }
+})();
+
+// Year and make dropdowns
+(function initLists() {
+  const maxYear = new Date().getFullYear() + 1;
+  for (let y = maxYear; y >= 1990; y--) els.year.add(new Option(y, y));
+  for (const m of MAKES) els.make.add(new Option(m, m));
+})();
+
+function setManualModel(on, hint, focus = true) {
+  manualModel = on;
+  els.model.hidden = on;
+  els.modelText.hidden = !on;
+  els.bodyWrap.hidden = !on;
+  els.modelHint.textContent = hint || "";
+  if (on && focus) els.modelText.focus({ preventScroll: true });
+}
+if (!CONFIG.liveModelList) setManualModel(true, "", false);
+
+// The federal database uses some names owners don't. Show the familiar name instead.
+const MODEL_LABELS = {
+  "Chevrolet|Silverado": "Silverado 1500",
+  "Chevrolet|Silverado HD": "Silverado 2500 / 3500 HD",
+  "Chevrolet|Silverado LD": "Silverado 1500 LD (older body style)",
+  "Chevrolet|Silverado LTD": "Silverado 1500 LTD (older body style)",
+  "GMC|Sierra": "Sierra 1500",
+  "GMC|Sierra HD": "Sierra 2500 / 3500 HD",
+  "GMC|Sierra Limited": "Sierra 1500 Limited (older body style)"
+};
+
+const VEHICLE_TYPES = [["Passenger Car", "car"], ["Multipurpose Passenger Vehicle (MPV)", "suv"], ["Truck", "truck"]];
+
+async function loadModels() {
+  if (!CONFIG.liveModelList) return;
+  const year = els.year.value, make = els.make.value;
+  const req = ++modelReq;
+  setManualModel(false);
+  els.model.innerHTML = "";
+  if (!year || !make) {
+    els.model.add(new Option("Pick year and make first", ""));
+    els.model.disabled = true;
+    return;
+  }
+  els.model.add(new Option("Loading models…", ""));
+  els.model.disabled = true;
+  try {
+    const lists = await Promise.all(VEHICLE_TYPES.map(async ([type, body]) => {
+      const url = "https://vpic.nhtsa.dot.gov/api/vehicles/GetModelsForMakeYear/make/" + encodeURIComponent(make) +
+        "/modelyear/" + year + "/vehicletype/" + encodeURIComponent(type) + "?format=json";
+      const res = await fetch(url);
+      if (!res.ok) throw new Error("lookup failed");
+      const data = await res.json();
+      return (data.Results || [])
+        .filter(r => (r.Make_Name || "").toLowerCase() === make.toLowerCase())
+        .map(r => ({ name: (r.Model_Name || "").trim(), body }));
+    }));
+    if (req !== modelReq) return;
+    const seen = new Map();
+    for (const m of lists.flat()) if (m.name && !seen.has(m.name.toLowerCase())) seen.set(m.name.toLowerCase(), m);
+    const models = [...seen.values()].sort((a, b) => a.name.localeCompare(b.name, "en", { numeric: true }));
+    if (!models.length) {
+      setManualModel(true, "We couldn't find models for that year. Type yours in.");
+      return;
+    }
+    els.model.innerHTML = "";
+    els.model.add(new Option("Select model", ""));
+    for (const m of models) {
+      const label = MODEL_LABELS[make + "|" + m.name] || m.name;
+      const o = new Option(label, label);
+      o.dataset.body = VAN_RE.test(m.name) ? "van" : m.body;
+      els.model.add(o);
+    }
+    els.model.add(new Option("My model isn't listed", "__other"));
+    els.model.disabled = false;
+  } catch (e) {
+    if (req !== modelReq) return;
+    setManualModel(true, "Model list is unavailable right now. Type yours in.");
+  }
+}
+els.year.addEventListener("change", loadModels);
+els.make.addEventListener("change", loadModels);
+els.model.addEventListener("change", () => {
+  if (els.model.value === "__other") setManualModel(true, "Type your model and pick the vehicle type.");
+});
+els.zip.addEventListener("input", () => { els.zip.value = els.zip.value.replace(/\D/g, "").slice(0, 5); });
+
+function showError(msg) {
+  els.error.textContent = msg;
+  els.error.classList.toggle("show", !!msg);
+}
+
+els.form.addEventListener("submit", e => {
+  e.preventDefault();
+  showError("");
+  const year = parseInt(els.year.value, 10);
+  const make = els.make.value;
+  let model, body;
+  if (manualModel) {
+    model = els.modelText.value.trim();
+    body = els.body.value;
+  } else {
+    const opt = els.model.selectedOptions[0];
+    model = opt && opt.value && opt.value !== "__other" ? opt.value : "";
+    body = opt ? opt.dataset.body : "";
+  }
+  const service = els.service.value;
+  const zip = els.zip.value.trim();
+
+  if (!year || !make) return showError("Pick your vehicle's year and make.");
+  if (!model) return showError(manualModel ? "Type your vehicle's model." : "Pick your vehicle's model.");
+  if (!service) return showError("Pick what needs to be fixed.");
+  if (!/^\d{5}$/.test(zip)) return showError("Enter a 5-digit zip code.");
+  const local = localFactor(zip);
+  if (!local) return showError("We can't price that zip code. Enter a zip in one of the 50 states or DC.");
+
+  const vehicle = { year, make, model, body: body || "car" };
+  const status = adasStatus(make, year, model);
+  current = { vehicle, service, zip, local, status, hasCamera: service === "windshield" && status === "likely", oem: false, place: local.state };
+  render();
+  els.results.hidden = false;
+  els.results.scrollIntoView({ behavior: "smooth", block: "start" });
+  lookupPlace(current);
+});
+
+// City name for the zip (display only; prices never depend on this call)
+async function lookupPlace(lookup) {
+  try {
+    const res = await fetch("https://api.zippopotam.us/us/" + lookup.zip);
+    if (!res.ok) return;
+    const data = await res.json();
+    const p = data.places && data.places[0];
+    if (p && current === lookup) {
+      lookup.place = p["place name"] + ", " + p["state abbreviation"];
+      $("resPlace").textContent = placeLine(lookup);
+    }
+  } catch (e) { /* keep the state-only label */ }
+}
+const placeLine = c => "Estimated pre-tax prices for " + c.place + " " + c.zip;
+
+function setCamera(val) {
+  if (!current) return;
+  current.hasCamera = val;
+  render();
+}
+$("adasYes").addEventListener("click", () => setCamera(true));
+$("adasNo").addEventListener("click", () => setCamera(false));
+function setOem(val) {
+  if (!current) return;
+  current.oem = val;
+  render();
+}
+$("glassAfter").addEventListener("click", () => setOem(false));
+$("glassOem").addEventListener("click", () => setOem(true));
+
+function render() {
+  const c = current, v = c.vehicle, s = SERVICES[c.service];
+  const tier = MAKE_TIER[v.make] || "mainstream";
+  const isGlass = GLASS_SERVICES.includes(c.service);
+  const showGlass = isGlass && tier !== "exotic";
+  const est = estimate(c.service, v, c.local, c.hasCamera, c.oem);
+
+  $("resService").textContent = s.label;
+  $("resVehicle").textContent = v.year + " " + v.make + " " + v.model;
+  $("resPlace").textContent = placeLine(c);
+
+  // Camera question (windshield replacement only)
+  const showAdas = c.service === "windshield" && c.status !== "unlikely";
+  $("adasBox").hidden = !showAdas;
+  $("glassBox").hidden = !showGlass;
+  $("opts").hidden = !showAdas && !showGlass;
+  if (showGlass) {
+    $("glassAfter").setAttribute("aria-pressed", String(!c.oem));
+    $("glassOem").setAttribute("aria-pressed", String(c.oem));
+    $("glassHelp").textContent = "Most shops quote aftermarket glass, made to the same fit by another manufacturer. Genuine glass carries the " + v.make + " logo and costs more. Not sure? Ask your shop.";
+  }
+  if (showAdas) {
+    $("adasYes").setAttribute("aria-pressed", String(c.hasCamera));
+    $("adasNo").setAttribute("aria-pressed", String(!c.hasCamera));
+    $("adasHelp").textContent = SELF_CALIBRATING.includes(v.make)
+      ? v.make + " cameras recalibrate themselves as you drive, so there is usually no separate recalibration charge."
+      : c.status === "likely"
+      ? "Most " + v.year + " " + v.make + " models have one for lane-keep or automatic braking. It has to be recalibrated after a new windshield, so we've included that."
+      : "Some " + v.year + " " + v.make + " trims have one for lane-keep or automatic braking. To check, look from outside for a black housing behind the mirror.";
+  }
+
+  $("pGreat").innerHTML = "<small>Under</small> " + money(est.great);
+  const range = (a, b) => "<span>" + money(a) + " –</span> <span>" + money(b) + "</span>";
+  $("pGood").innerHTML = range(est.great, est.mid - 1);
+  $("pFair").innerHTML = range(est.mid, est.over);
+  $("pOver").innerHTML = "<small>Over</small> " + money(est.over);
+  $("t1").textContent = money(est.great);
+  $("t2").textContent = money(est.mid);
+  $("t3").textContent = money(est.over);
+
+  // What the price includes (kept next to the prices so it shows in screenshots)
+  const inc = [];
+  if (isGlass) inc.push((c.oem || tier === "exotic" ? "genuine " + v.make : "aftermarket") + " glass", "installation");
+  if (c.service === "chip") inc.push("repair of one chip");
+  if (est.hasCal || c.service === "adas") inc.push("camera recalibration");
+  $("inclLine").innerHTML = "<b>Includes:</b> " + inc.join(", ") + ". <b>Not included:</b> sales tax" +
+    (c.service === "windshield" && !est.hasCal && !est.selfCal ? ", camera recalibration" : "") + ".";
+  $("basisLine").textContent = "Estimate from 2026 " + (c.local.market ? c.local.market + " price data" : "national price data adjusted for your area") + ". Not a quote.";
+
+  // Notes
+  const notes = [];
+  if (showAdas && !c.hasCamera) {
+    const alt = estimate(c.service, v, c.local, true, c.oem);
+    notes.push("<p><b>Not sure about the camera?</b> If your car has one, the typical price is about " + money(alt.mid) +
+      (alt.hasCal ? ", including recalibration" : "") + ".</p>");
+  }
+  if (est.hasCal) {
+    notes.push('<p class="split"><b>These prices include camera recalibration.</b> Expect roughly ' +
+      money(est.glassLow) + " – " + money(est.glassHigh) + " for the glass and " +
+      money(est.calLow) + " – " + money(est.calHigh) + " for recalibration. Many quotes leave recalibration out, so check that yours includes it.</p>");
+  }
+  if (c.service === "windshield") notes.push("<p>Options we can't see without your VIN, like a heads-up display, heated glass, or acoustic glass, can add $50 to $400.</p>");
+  if (c.service === "chip") notes.push("<p>Price is for the first chip. Extra chips usually add $15 to $30 each. Chips bigger than a quarter or cracks longer than about 6 inches usually mean a new windshield.</p>");
+  if (c.service === "door") notes.push("<p>Covers one front or rear door window, including cleanup of the broken glass. Laminated (double-layer) door glass on some luxury models costs more.</p>");
+  if (c.service === "back") notes.push(v.body === "truck"
+    ? "<p>Covers a fixed, heated back glass. A power sliding rear window usually costs 1.5 to 2 times more.</p>"
+    : "<p>Covers heated back glass, including cleanup of the broken glass.</p>");
+  if (c.service === "quarter") notes.push("<p>Covers one fixed side window (quarter or vent glass).</p>");
+  if (c.service === "sunroof") notes.push("<p>Covers the glass panel only. Track, motor, or frame repairs are extra.</p>");
+  if (c.service === "pano") notes.push("<p>Covers one glass panel only. Panoramic roof prices vary a lot by vehicle, so treat this as a starting range.</p>");
+  if (c.service === "adas") notes.push("<p>For recalibrating the forward camera on its own, for example after a windshield was replaced elsewhere or an alignment.</p>");
+  if (tier === "exotic") notes.push("<p>Glass for this vehicle is specialty-order and prices swing widely. Call or text us for an exact number.</p>");
+  $("notes").innerHTML = notes.join("");
+
+  // Text link with the lookup details filled in
+  const msg = "Hi, I'd like a quote: " + v.year + " " + v.make + " " + v.model + ", " + s.label.toLowerCase() + ", zip " + c.zip + ".";
+  $("textBtn").href = "sms:" + CONFIG.phoneDial + "?&body=" + encodeURIComponent(msg);
+}
+</script>
+</body>
+</html>
