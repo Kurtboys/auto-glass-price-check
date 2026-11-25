@@ -94,7 +94,8 @@ const CONFIG = {
   .wordmark { display: inline-flex; flex-direction: column; align-items: center; line-height: 1; font-weight: 700; }
   .wordmark .w1 { color: var(--blue); font-size: 24px; letter-spacing: 0.5px; font-style: italic; }
   .wordmark .w2 { margin-top: 3px; background: var(--red); color: #fff; font-size: 12px; letter-spacing: 1px; padding: 3px 9px; border-radius: 10px; }
-  .head-phone { color: var(--blue); font-weight: 700; text-decoration: none; white-space: nowrap; font-size: 18px; }
+  .head-phone { color: var(--blue); font-weight: 700; text-decoration: none; white-space: nowrap; font-size: 15px; text-transform: uppercase; letter-spacing: 0.8px; padding: 9px 16px; border: 2px solid var(--blue); border-radius: 4px; }
+  .head-phone:hover { background: var(--blue-tint); }
   .head-phone span { display: block; font-size: 12px; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; text-align: right; }
 
   /* Hero */
@@ -205,7 +206,7 @@ const CONFIG = {
   .btn-text { background: #fff; color: var(--blue); }
   .btn-text:hover { background: var(--blue-tint); }
   .cta .ins, .cta-alt { margin: 12px 0 0; font-size: 14px; color: #E6ECF6; }
-  .copybtn { background: none; border: 0; padding: 4px 0; font: inherit; font-weight: 700; color: #fff; text-decoration: underline; cursor: pointer; }
+  .cta-fallback { color: #fff; font-weight: 700; font-size: 15px; }
 
   details.how { margin: 16px 22px 0; border-top: 1px solid var(--line); padding: 12px 0 0; font-size: 15px; }
   details.how summary { cursor: pointer; font-weight: 700; color: var(--blue); }
@@ -247,7 +248,7 @@ const CONFIG = {
       <img id="logoImg" alt="All-Star Auto Glass" hidden>
       <span class="wordmark" id="wordmark"><span class="w1">ALL-STAR</span><span class="w2">AUTO GLASS</span></span>
     </a>
-    <a class="head-phone" id="headPhone" href="#"><span>Text us</span><b id="headPhoneNum"></b></a>
+    <a class="head-phone" id="headPhone" href="#">Text us</a>
   </div>
 </header>
 
@@ -394,8 +395,8 @@ const CONFIG = {
         <a class="btn btn-call" id="textBtn" href="#">Text us</a>
         <a class="btn btn-text" id="emailBtn" href="#">Email us</a>
       </div>
-      <p class="cta-alt">Your vehicle, answers, and price ranges are filled in for you. <button type="button" class="copybtn" id="copyBtn">Copy my results</button></p>
-      <p class="cta-alt" id="ctaContacts"></p>
+      <p class="cta-alt">Your vehicle, answers, and price ranges are filled in for you.</p>
+      <p class="cta-alt cta-fallback" id="ctaFallback" role="status" hidden></p>
       <p class="ins">Using insurance? You may only owe your deductible. We work with all major insurers.</p>
     </div>
 
@@ -759,9 +760,7 @@ const ADAS_PACKAGE = {
 
 // Branding and contact links
 (function initBrand() {
-  $("headPhoneNum").textContent = CONFIG.phoneDisplay;
   $("headPhone").href = "sms:" + CONFIG.phoneDial;
-  $("ctaContacts").textContent = "Text " + CONFIG.phoneDisplay + " or email " + CONFIG.email;
   $("ctaHeadline").textContent = CONFIG.ctaHeadline;
   $("logoLink").href = CONFIG.websiteUrl;
   $("footLink").href = CONFIG.websiteUrl;
@@ -1056,6 +1055,7 @@ function render() {
   if (tier === "exotic") notes.push("<p>Glass for this vehicle is specialty-order and prices swing widely. Text or email us for an exact number.</p>");
   $("notes").innerHTML = notes.join("");
 
+  $("ctaFallback").hidden = true;
   // Text and email, pre-filled with everything the visitor entered and the prices they saw
   const lines = lookupSummary(c, est);
   const link = shareUrl(c);
@@ -1088,23 +1088,30 @@ function shareUrl(c) {
   q.set("src", "shared");
   return location.origin + location.pathname + "?" + q.toString();
 }
-$("copyBtn").addEventListener("click", async () => {
-  const done = () => { $("copyBtn").textContent = "Copied"; setTimeout(() => { $("copyBtn").textContent = "Copy my results"; }, 2000); };
-  track("copy_results", lookupParams(current));
-  try { await navigator.clipboard.writeText(lastSummary); done(); }
-  catch (e) {
-    const t = document.createElement("textarea");
-    t.value = lastSummary; t.setAttribute("readonly", ""); t.style.position = "fixed"; t.style.opacity = "0";
-    document.body.appendChild(t); t.select();
-    try { document.execCommand("copy"); done(); } catch (e2) { /* nothing more to try */ }
-    t.remove();
-  }
-});
 
 // A tap on Text or Email is the lead. The tap is all a web page can see; the message itself is sent from the visitor's own app.
-$("textBtn").addEventListener("click", () => track("generate_lead", Object.assign({ method: "text", placement: "results" }, lookupParams(current))));
-$("emailBtn").addEventListener("click", () => track("generate_lead", Object.assign({ method: "email", placement: "results" }, lookupParams(current))));
-$("headPhone").addEventListener("click", () => track("generate_lead", Object.assign({ method: "text", placement: "header" }, lookupParams(current))));
+// Phones open their own messaging and email apps. A computer may have neither set up, so there
+// the number or address is shown after the button is used. It is never on the page beforehand.
+const ON_PHONE = /Android|iPhone|iPod|Mobile/i.test(navigator.userAgent) || !!(navigator.userAgentData && navigator.userAgentData.mobile);
+function showFallback(kind) {
+  if (ON_PHONE) return;
+  $("ctaFallback").textContent = kind === "text"
+    ? "If your messaging app didn't open, text us at " + CONFIG.phoneDisplay + " from your phone."
+    : "If your email app didn't open, email us at " + CONFIG.email + ".";
+  $("ctaFallback").hidden = false;
+}
+$("textBtn").addEventListener("click", () => {
+  track("generate_lead", Object.assign({ method: "text", placement: "results" }, lookupParams(current)));
+  showFallback("text");
+});
+$("emailBtn").addEventListener("click", () => {
+  track("generate_lead", Object.assign({ method: "email", placement: "results" }, lookupParams(current)));
+  showFallback("email");
+});
+$("headPhone").addEventListener("click", () => {
+  track("generate_lead", Object.assign({ method: "text", placement: "header" }, lookupParams(current)));
+  if (!ON_PHONE) $("headPhone").textContent = "Text " + CONFIG.phoneDisplay;
+});
 
 // Opening a results link from a text or email shows that lookup right away.
 (function openSharedLookup() {
