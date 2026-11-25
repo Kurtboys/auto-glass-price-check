@@ -207,6 +207,10 @@ const CONFIG = {
   .btn-text:hover { background: var(--blue-tint); }
   .cta .ins, .cta-alt { margin: 12px 0 0; font-size: 14px; color: #E6ECF6; }
   .cta-fallback { color: #fff; font-weight: 700; font-size: 15px; }
+  .cta-name { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; max-width: 612px; margin: 0 auto 14px; text-align: left; }
+  .cta-name label { color: #E6ECF6; }
+  .cta-name input.missing { outline: 3px solid #FFB3BD; outline-offset: 1px; }
+  .cta-error { margin: -4px 0 12px; font-size: 15px; font-weight: 700; color: #FFD3D9; }
 
   details.how { margin: 16px 22px 0; border-top: 1px solid var(--line); padding: 12px 0 0; font-size: 15px; }
   details.how summary { cursor: pointer; font-weight: 700; color: var(--blue); }
@@ -230,6 +234,7 @@ const CONFIG = {
     .logo img { height: 46px; }
   }
   @media (max-width: 480px) {
+    .cta-name { grid-template-columns: 1fr; }
     .seg.three { display: flex; flex-direction: column; }
     .seg.three button + button { border-left: 0; border-top: 1px solid var(--blue); }
     .lookfor-grid { grid-template-columns: 1fr 1fr; }
@@ -391,11 +396,16 @@ const CONFIG = {
 
     <div class="cta">
       <h3 id="ctaHeadline"></h3>
+      <div class="cta-name">
+        <div><label for="firstName">First name</label><input type="text" id="firstName" autocomplete="given-name" maxlength="40"></div>
+        <div><label for="lastName">Last name</label><input type="text" id="lastName" autocomplete="family-name" maxlength="40"></div>
+      </div>
+      <p class="cta-error" id="nameError" role="alert" hidden>Enter your first and last name so we know who to reply to.</p>
       <div class="cta-btns">
         <a class="btn btn-call" id="textBtn" href="#">Text us</a>
         <a class="btn btn-text" id="emailBtn" href="#">Email us</a>
       </div>
-      <p class="cta-alt">Your vehicle, answers, and price ranges are filled in for you.</p>
+      <p class="cta-alt">Your name, vehicle, answers, and price ranges are filled in for you.</p>
       <p class="cta-alt cta-fallback" id="ctaFallback" role="status" hidden></p>
       <p class="ins">Using insurance? You may only owe your deductible. We work with all major insurers.</p>
     </div>
@@ -1057,16 +1067,47 @@ function render() {
   $("notes").innerHTML = notes.join("");
 
   $("ctaFallback").hidden = true;
-  // Text and email, pre-filled with everything the visitor entered and the prices they saw
+  updateContactLinks();
+}
+
+// The visitor's name. It goes only into their own text or email: never into tracking or the results link.
+function contactName() {
+  const clean = id => $(id).value.replace(/\s+/g, " ").trim().slice(0, 40);
+  return { first: clean("firstName"), last: clean("lastName") };
+}
+// Text and email, pre-filled with the name, everything the visitor entered, and the prices they saw
+function updateContactLinks() {
+  if (!current) return;
+  const c = current, v = c.vehicle, s = SERVICES[c.service];
+  const est = estimate(c.service, v, c.local, c.hasCamera, c.oem);
+  const n = contactName(), who = (n.first + " " + n.last).trim();
   const lines = lookupSummary(c, est);
+  if (who) lines.unshift("Name: " + who);
   const link = shareUrl(c);
-  lastSummary = "Hi, I'd like the All-Star price for my vehicle.\n\n" + lines.join("\n") +
+  lastSummary = "Hi" + (who ? ", this is " + who : "") + ". I'd like the All-Star price for my vehicle.\n\n" + lines.join("\n") +
     (SOURCE !== "direct" ? "\nRef: " + SOURCE : "") + (link ? "\n\nMy results: " + link : "");
   $("textBtn").href = "sms:" + CONFIG.phoneDial + "?&body=" + encodeURIComponent(lastSummary);
   $("emailBtn").href = "mailto:" + CONFIG.email +
-    "?subject=" + encodeURIComponent("Price request: " + v.year + " " + v.make + " " + v.model + ", " + s.label.toLowerCase()) +
+    "?subject=" + encodeURIComponent("Price request: " + (who ? who + ", " : "") + v.year + " " + v.make + " " + v.model + ", " + s.label.toLowerCase()) +
     "&body=" + encodeURIComponent(lastSummary.replace(/\n/g, "\r\n"));
 }
+// Text us and Email us wait until both names are filled in.
+function nameReady(e) {
+  const n = contactName();
+  $("firstName").classList.toggle("missing", !n.first);
+  $("lastName").classList.toggle("missing", !n.last);
+  if (n.first && n.last) { $("nameError").hidden = true; return true; }
+  e.preventDefault();
+  $("nameError").hidden = false;
+  (n.first ? $("lastName") : $("firstName")).focus();
+  return false;
+}
+["firstName", "lastName"].forEach(id => $(id).addEventListener("input", () => {
+  updateContactLinks();
+  const n = contactName();
+  if ($(id).value.trim()) $(id).classList.remove("missing");
+  if (n.first && n.last) $("nameError").hidden = true;
+}));
 
 // The details sent with a text or email, one per line.
 let lastSummary = "";
@@ -1101,11 +1142,13 @@ function showFallback(kind) {
     : "If your email app didn't open, email us at " + CONFIG.email + ".";
   $("ctaFallback").hidden = false;
 }
-$("textBtn").addEventListener("click", () => {
+$("textBtn").addEventListener("click", e => {
+  if (!nameReady(e)) return;
   track("generate_lead", Object.assign({ method: "text", placement: "results" }, lookupParams(current)));
   showFallback("text");
 });
-$("emailBtn").addEventListener("click", () => {
+$("emailBtn").addEventListener("click", e => {
+  if (!nameReady(e)) return;
   track("generate_lead", Object.assign({ method: "email", placement: "results" }, lookupParams(current)));
   showFallback("email");
 });
