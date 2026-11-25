@@ -17,15 +17,21 @@
 const CONFIG = {
   businessName: "All-Star Auto Glass",
 
-  // Phone number for the Call and Text buttons. Change both lines together.
-  phoneDisplay: "(206) 255-7827",     // how the number is shown on the Call button
-  phoneDial:    "+12062557827",       // digits only with +1, used by the Call and Text links
+  // Phone number that receives texts. Change both lines together.
+  phoneDisplay: "(206) 255-7827",     // how the number is shown on the page
+  phoneDial:    "+12062557827",       // digits only with +1, used by the Text links
+
+  // Inbox that receives emails from the Email button.
+  email: "info@callallstar.com",
 
   // Logo image. If it fails to load, a text version of the logo is shown instead.
   logoUrl: "https://callallstar.com/wp-content/uploads/2018/05/simplelogo-neg100.jpg",
   websiteUrl: "https://callallstar.com/",
 
-  ctaHeadline: "If you want a great price, call or text us now!",
+  ctaHeadline: "If you want the All-Star price, text or email us now!",
+
+  // true = texts and emails include a link that reopens the customer's results.
+  shareLink: true,
 
   // true = model dropdown filled from the federal NHTSA vehicle database.
   // false = visitors type their model (use only where outside lookups are blocked).
@@ -185,7 +191,8 @@ const CONFIG = {
   .btn-call:hover { background: var(--green-dark); }
   .btn-text { background: #fff; color: var(--blue); }
   .btn-text:hover { background: var(--blue-tint); }
-  .cta .ins { margin: 12px 0 0; font-size: 14px; color: #E6ECF6; }
+  .cta .ins, .cta-alt { margin: 12px 0 0; font-size: 14px; color: #E6ECF6; }
+  .copybtn { background: none; border: 0; padding: 4px 0; font: inherit; font-weight: 700; color: #fff; text-decoration: underline; cursor: pointer; }
 
   details.how { margin: 16px 22px 0; border-top: 1px solid var(--line); padding: 12px 0 0; font-size: 15px; }
   details.how summary { cursor: pointer; font-weight: 700; color: var(--blue); }
@@ -227,7 +234,7 @@ const CONFIG = {
       <img id="logoImg" alt="All-Star Auto Glass" hidden>
       <span class="wordmark" id="wordmark"><span class="w1">ALL-STAR</span><span class="w2">AUTO GLASS</span></span>
     </a>
-    <a class="head-phone" id="headPhone" href="#"><span>Call or text</span><b id="headPhoneNum"></b></a>
+    <a class="head-phone" id="headPhone" href="#"><span>Text us</span><b id="headPhoneNum"></b></a>
   </div>
 </header>
 
@@ -371,9 +378,11 @@ const CONFIG = {
     <div class="cta">
       <h3 id="ctaHeadline"></h3>
       <div class="cta-btns">
-        <a class="btn btn-call" id="callBtn" href="#">Call <span id="callNum"></span></a>
-        <a class="btn btn-text" id="textBtn" href="#">Text us</a>
+        <a class="btn btn-call" id="textBtn" href="#">Text us</a>
+        <a class="btn btn-text" id="emailBtn" href="#">Email us</a>
       </div>
+      <p class="cta-alt">Your vehicle, answers, and price ranges are filled in for you. <button type="button" class="copybtn" id="copyBtn">Copy my results</button></p>
+      <p class="cta-alt" id="ctaContacts"></p>
       <p class="ins">Using insurance? You may only owe your deductible. We work with all major insurers.</p>
     </div>
 
@@ -390,7 +399,7 @@ const CONFIG = {
         <li><b>What we can't see:</b> options such as a heads-up display, heated glass, or acoustic glass, which only a VIN lookup confirms. That is why this is a range and not a quote.</li>
       </ul>
     </details>
-    <p class="fine">Estimates are out-of-pocket prices before tax. They come from national data adjusted for your vehicle and area, not from a survey of shops in your zip code. Compare quotes on the same basis: same glass type, with installation and recalibration included. Your exact price depends on your vehicle's options, which we confirm by VIN when you call or text.</p>
+    <p class="fine">Estimates are out-of-pocket prices before tax. They come from national data adjusted for your vehicle and area, not from a survey of shops in your zip code. Compare quotes on the same basis: same glass type, with installation and recalibration included. Your exact price depends on your vehicle's options, which we confirm by VIN when you text or email.</p>
   </section>
 </main>
 
@@ -660,9 +669,8 @@ const ADAS_PACKAGE = {
 // Branding and contact links
 (function initBrand() {
   $("headPhoneNum").textContent = CONFIG.phoneDisplay;
-  $("headPhone").href = "tel:" + CONFIG.phoneDial;
-  $("callNum").textContent = CONFIG.phoneDisplay;
-  $("callBtn").href = "tel:" + CONFIG.phoneDial;
+  $("headPhone").href = "sms:" + CONFIG.phoneDial;
+  $("ctaContacts").textContent = "Text " + CONFIG.phoneDisplay + " or email " + CONFIG.email;
   $("ctaHeadline").textContent = CONFIG.ctaHeadline;
   $("logoLink").href = CONFIG.websiteUrl;
   $("footLink").href = CONFIG.websiteUrl;
@@ -948,13 +956,76 @@ function render() {
   if (c.service === "sunroof") notes.push("<p>Covers the glass panel only. Track, motor, or frame repairs are extra.</p>");
   if (c.service === "pano") notes.push("<p>Covers one glass panel only. Panoramic roof prices vary a lot by vehicle, so treat this as a starting range.</p>");
   if (c.service === "adas") notes.push("<p>For recalibrating the forward camera on its own, for example after a windshield was replaced elsewhere or an alignment.</p>");
-  if (tier === "exotic") notes.push("<p>Glass for this vehicle is specialty-order and prices swing widely. Call or text us for an exact number.</p>");
+  if (tier === "exotic") notes.push("<p>Glass for this vehicle is specialty-order and prices swing widely. Text or email us for an exact number.</p>");
   $("notes").innerHTML = notes.join("");
 
-  // Text link with the lookup details filled in
-  const msg = "Hi, I'd like a quote: " + v.year + " " + v.make + " " + v.model + ", " + s.label.toLowerCase() + ", zip " + c.zip + ".";
-  $("textBtn").href = "sms:" + CONFIG.phoneDial + "?&body=" + encodeURIComponent(msg);
+  // Text and email, pre-filled with everything the visitor entered and the prices they saw
+  const lines = lookupSummary(c, est);
+  const link = shareUrl(c);
+  lastSummary = "Hi, I'd like the All-Star price for my vehicle.\n\n" + lines.join("\n") + (link ? "\n\nMy results: " + link : "");
+  $("textBtn").href = "sms:" + CONFIG.phoneDial + "?&body=" + encodeURIComponent(lastSummary);
+  $("emailBtn").href = "mailto:" + CONFIG.email +
+    "?subject=" + encodeURIComponent("Price request: " + v.year + " " + v.make + " " + v.model + ", " + s.label.toLowerCase()) +
+    "&body=" + encodeURIComponent(lastSummary.replace(/\n/g, "\r\n"));
 }
+
+// The details sent with a text or email, one per line.
+let lastSummary = "";
+function lookupSummary(c, est) {
+  const v = c.vehicle, tier = MAKE_TIER[v.make] || "mainstream";
+  const lines = ["Year: " + v.year, "Make: " + v.make, "Model: " + v.model, "Service: " + SERVICES[c.service].label, "Zip Code: " + c.zip];
+  if (GLASS_SERVICES.includes(c.service)) lines.push("Glass: " + (c.oem || tier === "exotic" ? "Genuine (OEM)" : "Aftermarket"));
+  if (c.service === "windshield") lines.push("ADAS: " + (c.hasCamera ? "Yes" : "No"));
+  lines.push("Great: under " + money(est.great), "Good: " + money(est.great) + "-" + money(est.mid - 1),
+    "Fair: " + money(est.mid) + "-" + money(est.over), "Overpaying: over " + money(est.over));
+  return lines;
+}
+// A link that reopens this exact lookup. Only vehicle, service, zip, and the two answers go in it.
+function shareUrl(c) {
+  if (!CONFIG.shareLink || !/^https?:$/.test(location.protocol)) return "";
+  const v = c.vehicle;
+  const q = new URLSearchParams({ y: v.year, mk: v.make, md: v.model, b: v.body, s: c.service, z: c.zip });
+  if (GLASS_SERVICES.includes(c.service)) q.set("g", c.oem ? "oem" : "am");
+  if (c.service === "windshield") q.set("a", c.hasCamera ? "1" : "0");
+  return location.origin + location.pathname + "?" + q.toString();
+}
+$("copyBtn").addEventListener("click", async () => {
+  const done = () => { $("copyBtn").textContent = "Copied"; setTimeout(() => { $("copyBtn").textContent = "Copy my results"; }, 2000); };
+  try { await navigator.clipboard.writeText(lastSummary); done(); }
+  catch (e) {
+    const t = document.createElement("textarea");
+    t.value = lastSummary; t.setAttribute("readonly", ""); t.style.position = "fixed"; t.style.opacity = "0";
+    document.body.appendChild(t); t.select();
+    try { document.execCommand("copy"); done(); } catch (e2) { /* nothing more to try */ }
+    t.remove();
+  }
+});
+
+// Opening a results link from a text or email shows that lookup right away.
+(function openSharedLookup() {
+  const q = new URLSearchParams(location.search);
+  if (!q.has("y") || !q.has("mk") || !q.has("s") || !q.has("z")) return;
+  const year = parseInt(q.get("y"), 10), make = q.get("mk"), model = (q.get("md") || "").trim().slice(0, 60);
+  const service = q.get("s"), zip = q.get("z");
+  const body = ["car", "suv", "truck", "van"].includes(q.get("b")) ? q.get("b") : "car";
+  if (!(year >= 1990 && year <= 2100) || !MAKES.includes(make) || !model || !SERVICES[service] || !/^\d{5}$/.test(zip)) return;
+  const local = localFactor(zip);
+  if (!local) return;
+  els.year.value = String(year); els.make.value = make; els.service.value = service; els.zip.value = zip;
+  setManualModel(true, "", false);
+  els.modelText.value = model; els.body.value = body;
+  formGlass = q.has("g") ? (q.get("g") === "oem" ? "oem" : "aftermarket") : null;
+  formAdas = q.has("a") ? q.get("a") === "1" : null;
+  const need = updateQuestions();
+  syncQuestions();
+  const status = need.status || adasStatus(make, year, model);
+  const hasCamera = service === "windshield" && (q.has("a") ? q.get("a") === "1" : status === "likely");
+  current = { vehicle: { year, make, model, body }, service, zip, local, status, hasCamera,
+    oem: need.needGlass && formGlass === "oem", glassUnsure: false, place: local.state };
+  render();
+  els.results.hidden = false;
+  lookupPlace(current);
+})();
 </script>
 </body>
 </html>
