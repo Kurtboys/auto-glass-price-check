@@ -722,6 +722,7 @@ function track(name, params) {
   if (typeof window.fbq === "function") {
     if (name === "generate_lead") window.fbq("track", "Lead", data);
     else if (name === "price_check") window.fbq("trackCustom", "PriceCheck", data);
+    else if (name === "form_start") window.fbq("trackCustom", "FormStart", data);
   }
   const t = CONFIG.tracking || {};
   if (name === "generate_lead" && t.googleAdsId && t.googleAdsLeadLabel && typeof window.gtag === "function") {
