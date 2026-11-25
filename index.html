@@ -898,6 +898,10 @@ els.model.addEventListener("change", () => {
 });
 els.modelText.addEventListener("input", vehicleChanged);
 els.service.addEventListener("change", updateQuestions);
+
+// First touch of any field: the top of the funnel (started, got prices, tapped Text or Email).
+let formStarted = false;
+els.form.addEventListener("change", () => { if (!formStarted) { formStarted = true; track("form_start"); } });
 els.zip.addEventListener("input", () => { els.zip.value = els.zip.value.replace(/\D/g, "").slice(0, 5); });
 
 function showError(msg) {
