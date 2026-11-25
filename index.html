@@ -123,6 +123,22 @@ const CONFIG = {
   .res-head h2 { margin: 0; color: var(--ink); font-size: clamp(21px, 4vw, 26px); line-height: 1.2; font-weight: 700; }
   .res-head .sub { margin: 4px 0 0; font-size: 15px; color: var(--muted); }
 
+  .q { margin-top: 16px; padding: 14px 16px; background: var(--blue-tint); border-radius: var(--radius); scroll-margin-top: 16px; }
+  .q.missing { outline: 2px solid var(--red); outline-offset: 1px; }
+  .q-title { font-weight: 700; color: var(--ink); font-size: 17px; margin: 0 0 6px; }
+  .q-help { font-size: 14px; margin: 0 0 10px; }
+  .feat { margin: 0 0 8px; padding-left: 20px; font-size: 15px; color: var(--ink); }
+  .feat li { margin-bottom: 2px; }
+  .linkbtn { display: block; margin: 10px 0 0; padding: 6px 0; background: none; border: 0; font: inherit; font-size: 15px; font-weight: 700; color: var(--blue); text-decoration: underline; cursor: pointer; text-align: left; }
+  .lookfor { margin-top: 10px; padding: 14px; background: #fff; border: 1px solid var(--line); border-radius: var(--radius); font-size: 14px; line-height: 1.4; }
+  .lookfor > p { margin: 0 0 12px; color: var(--ink); }
+  .lookfor > p:last-child { margin: 12px 0 0; }
+  .lookfor-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(125px, 1fr)); gap: 14px 12px; }
+  .lookfor figure { margin: 0; min-width: 0; }
+  .lookfor svg { width: 92px; height: 69px; padding: 7px 8px; background: var(--blue-tint); border-radius: 8px; color: var(--blue); display: block; margin-bottom: 6px; flex: none; }
+  .lookfor figure.wide { grid-column: 1 / -1; display: flex; align-items: center; gap: 12px; padding-top: 12px; border-top: 1px solid var(--line); }
+  .lookfor figure.wide svg { margin-bottom: 0; }
+  .lookfor figcaption b { display: block; color: var(--ink); margin-bottom: 2px; }
   .opts { margin: 16px 22px 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
   .adas { padding: 14px 16px; background: var(--blue-tint); border-radius: var(--radius); min-width: 0; }
   .adas-q { font-weight: 700; color: var(--ink); font-size: 16px; margin: 0 0 4px; }
@@ -191,6 +207,11 @@ const CONFIG = {
     .fine { padding-left: 16px; padding-right: 16px; }
     .head-phone span { display: none; }
     .logo img { height: 46px; }
+  }
+  @media (max-width: 480px) {
+    .seg.three { display: flex; flex-direction: column; }
+    .seg.three button + button { border-left: 0; border-top: 1px solid var(--blue); }
+    .lookfor-grid { grid-template-columns: 1fr 1fr; }
   }
   @media (max-width: 360px) {
     .tiers { grid-template-columns: 1fr; }
@@ -262,6 +283,43 @@ const CONFIG = {
         <input type="text" id="zip" inputmode="numeric" pattern="[0-9]{5}" maxlength="5" placeholder="e.g. 98134" autocomplete="postal-code" required>
       </div>
     </div>
+    <div class="q" id="qGlass" hidden>
+      <p class="q-title" id="qGlassTitle">Which glass is your quote for?</p>
+      <p class="q-help">Most shops quote aftermarket glass, made to the same fit by another manufacturer. Genuine (OEM) glass carries the carmaker's logo and costs more.</p>
+      <div class="seg three" role="group" aria-labelledby="qGlassTitle">
+        <button type="button" data-glass="aftermarket" aria-pressed="false">Aftermarket</button>
+        <button type="button" data-glass="oem" aria-pressed="false">Genuine (OEM)</button>
+        <button type="button" data-glass="unsure" aria-pressed="false">Not sure</button>
+      </div>
+    </div>
+
+    <div class="q" id="qAdas" hidden>
+      <p class="q-title" id="qAdasTitle">Does your vehicle have any of these safety features?</p>
+      <ul class="feat">
+        <li>Lane departure warning or lane keeping assist</li>
+        <li>Automatic emergency braking or forward collision warning</li>
+        <li>Adaptive cruise control</li>
+        <li>Automatic high beams</li>
+      </ul>
+      <p class="q-help">They use a camera on the windshield that has to be recalibrated after a replacement, which changes the price. <span id="qAdasHint"></span></p>
+      <div class="seg" role="group" aria-labelledby="qAdasTitle">
+        <button type="button" data-adas="yes" aria-pressed="false">Yes</button>
+        <button type="button" data-adas="no" aria-pressed="false">No</button>
+      </div>
+      <button type="button" class="linkbtn" id="adasHelpBtn" aria-expanded="false" aria-controls="adasHelpPanel">Not sure? See what to look for</button>
+      <div class="lookfor" id="adasHelpPanel" hidden>
+        <p>If you recognize any of these in your car, choose <b>Yes</b>.</p>
+        <div class="lookfor-grid">
+          <figure><svg viewBox="0 0 64 48" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 44L24 5M50 44L40 5" stroke-dasharray="6 5"/><rect x="24" y="24" width="16" height="11" rx="3"/><path d="M26.5 24l2.5-6h6l2.5 6M27 35v3M37 35v3"/></svg><figcaption><b>Lane departure or lane keep</b>A button or dash light showing a car between lane lines.</figcaption></figure>
+          <figure><svg viewBox="0 0 64 48" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 35v-5l3-1 3-5h7l3 5 2 1v5z"/><circle cx="8" cy="35" r="2.3"/><circle cx="17" cy="35" r="2.3"/><path d="M61 35v-5l-3-1-3-5h-7l-3 5-2 1v5z"/><circle cx="56" cy="35" r="2.3"/><circle cx="47" cy="35" r="2.3"/><path d="M40 20L35.7 21.5 37.7 25.7 33.5 23.7 32 28 30.5 23.7 26.3 25.7 28.3 21.5 24 20 28.3 18.5 26.3 14.3 30.5 16.3 32 12 33.5 16.3 37.7 14.3 35.7 18.5z" fill="currentColor" stroke-width="1"/></svg><figcaption><b>Collision warning or auto braking</b>A dash light or alert showing two cars with a burst between them.</figcaption></figure>
+          <figure><svg viewBox="0 0 64 48" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 42a22 22 0 0 1 44 0"/><path d="M32 42l10-13"/><circle cx="32" cy="42" r="2.2" fill="currentColor"/><path d="M24 14v-4l2.5-1 2.5-4h6l2.5 4 2.5 1v4z"/></svg><figcaption><b>Adaptive cruise control</b>A steering wheel button showing a speedometer with a car above it.</figcaption></figure>
+          <figure><svg viewBox="0 0 64 48" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M30 10c-11 0-17 6-17 14s6 14 17 14z"/><path d="M36 13h16M36 20h16M36 28h16M36 35h16"/><text x="18.5" y="28.5" font-size="12" font-weight="700" font-family="Arial, sans-serif" fill="currentColor" stroke="none">A</text></svg><figcaption><b>Automatic high beams</b>A headlight symbol with an A or the word AUTO.</figcaption></figure>
+          <figure class="wide"><svg viewBox="0 0 64 48" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 42L17 8h30l9 34z"/><rect x="26" y="8" width="12" height="7" fill="currentColor"/><circle cx="32" cy="11.5" r="1.7" fill="#fff" stroke="none"/><rect x="27" y="17" width="10" height="5" rx="2"/></svg><figcaption><b>Camera on the windshield</b>From outside, a black box at the top of the glass, behind the mirror.</figcaption></figure>
+        </div>
+        <p>None of these, and nothing behind the mirror? Choose <b>No</b>.</p>
+      </div>
+    </div>
+
     <p class="error" id="error" role="alert"></p>
     <button class="btn btn-primary" type="submit">Check my price</button>
   </form>
@@ -275,7 +333,7 @@ const CONFIG = {
 
     <div class="opts" id="opts" hidden>
       <div class="adas" id="glassBox" hidden>
-        <p class="adas-q">Which glass is your quote for?</p>
+        <p class="adas-q">Glass type</p>
         <p class="adas-help" id="glassHelp"></p>
         <div class="seg" role="group" aria-label="Glass type">
           <button type="button" id="glassAfter" aria-pressed="true">Aftermarket</button>
@@ -283,9 +341,9 @@ const CONFIG = {
         </div>
       </div>
       <div class="adas" id="adasBox" hidden>
-        <p class="adas-q">Is there a camera behind your rearview mirror?</p>
+        <p class="adas-q">Driver-assist safety features</p>
         <p class="adas-help" id="adasHelp"></p>
-        <div class="seg" role="group" aria-label="Camera behind rearview mirror">
+        <div class="seg" role="group" aria-label="Driver-assist safety features">
           <button type="button" id="adasYes" aria-pressed="false">Yes</button>
           <button type="button" id="adasNo" aria-pressed="false">No</button>
         </div>
@@ -588,6 +646,17 @@ const els = {
 let manualModel = false;
 let modelReq = 0;
 let current = null;   // last submitted lookup
+let formGlass = null;  // "aftermarket" | "oem" | "unsure"; nothing is chosen until the visitor picks
+let formAdas = null;   // true | false; nothing is chosen until the visitor picks
+
+// What each brand calls its driver-assist package, to help owners recognize it.
+const ADAS_PACKAGE = {
+  "Toyota": "Toyota Safety Sense", "Lexus": "Lexus Safety System+", "Honda": "Honda Sensing", "Acura": "AcuraWatch",
+  "Subaru": "EyeSight", "Ford": "Co-Pilot360", "Lincoln": "Co-Pilot360", "Nissan": "Safety Shield 360",
+  "INFINITI": "ProPILOT Assist", "Hyundai": "SmartSense", "Kia": "Drive Wise", "Mazda": "i-Activsense",
+  "Chevrolet": "Chevy Safety Assist", "GMC": "GMC Pro Safety", "Buick": "Driver Confidence", "Volkswagen": "IQ.DRIVE",
+  "Volvo": "City Safety", "BMW": "Driving Assistant", "Mercedes-Benz": "Driver Assistance Package", "Audi": "Audi pre sense"
+};
 
 // Branding and contact links
 (function initBrand() {
@@ -685,11 +754,51 @@ async function loadModels() {
     setManualModel(true, "Model list is unavailable right now. Type yours in.");
   }
 }
-els.year.addEventListener("change", loadModels);
-els.make.addEventListener("change", loadModels);
+function formModel() {
+  if (manualModel) return els.modelText.value.trim();
+  return els.model.value && els.model.value !== "__other" ? els.model.value : "";
+}
+// Shows the glass and safety-feature questions when they apply, and says what they'd change.
+function updateQuestions() {
+  const year = parseInt(els.year.value, 10), make = els.make.value, model = formModel(), service = els.service.value;
+  const tier = MAKE_TIER[make] || "mainstream";
+  const status = year && make ? adasStatus(make, year, model) : null;
+  const needGlass = GLASS_SERVICES.includes(service) && tier !== "exotic";
+  const needAdas = service === "windshield" && !!status && status !== "unlikely" && !SELF_CALIBRATING.includes(make);
+  $("qGlass").hidden = !needGlass;
+  $("qAdas").hidden = !needAdas;
+  if (needAdas) {
+    const pkg = ADAS_PACKAGE[make];
+    const name = year + " " + make + (model ? " " + model : "");
+    $("qAdasHint").textContent = (pkg ? make + " often calls this " + pkg + ". " : "") +
+      (status === "likely" ? "Most " + name + " models have them." : "Some " + name + " models have them, depending on trim.");
+  }
+  return { needGlass, needAdas, status };
+}
+function syncQuestions() {
+  document.querySelectorAll("[data-glass]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.glass === formGlass)));
+  document.querySelectorAll("[data-adas]").forEach(b => b.setAttribute("aria-pressed", String(formAdas !== null && (b.dataset.adas === "yes") === formAdas)));
+  if (formGlass) $("qGlass").classList.remove("missing");
+  if (formAdas !== null) $("qAdas").classList.remove("missing");
+}
+function vehicleChanged() { formAdas = null; syncQuestions(); updateQuestions(); }
+document.querySelectorAll("[data-glass]").forEach(b => b.addEventListener("click", () => { formGlass = b.dataset.glass; syncQuestions(); showError(""); }));
+document.querySelectorAll("[data-adas]").forEach(b => b.addEventListener("click", () => { formAdas = b.dataset.adas === "yes"; syncQuestions(); showError(""); }));
+$("adasHelpBtn").addEventListener("click", () => {
+  const panel = $("adasHelpPanel"), open = panel.hidden;
+  panel.hidden = !open;
+  $("adasHelpBtn").setAttribute("aria-expanded", String(open));
+  $("adasHelpBtn").textContent = open ? "Hide the pictures" : "Not sure? See what to look for";
+});
+
+els.year.addEventListener("change", () => { loadModels(); vehicleChanged(); });
+els.make.addEventListener("change", () => { loadModels(); vehicleChanged(); });
 els.model.addEventListener("change", () => {
   if (els.model.value === "__other") setManualModel(true, "Type your model and pick the vehicle type.");
+  vehicleChanged();
 });
+els.modelText.addEventListener("input", vehicleChanged);
+els.service.addEventListener("change", updateQuestions);
 els.zip.addEventListener("input", () => { els.zip.value = els.zip.value.replace(/\D/g, "").slice(0, 5); });
 
 function showError(msg) {
@@ -721,9 +830,17 @@ els.form.addEventListener("submit", e => {
   const local = localFactor(zip);
   if (!local) return showError("We can't price that zip code. Enter a zip in one of the 50 states or DC.");
 
+  // Both questions start blank, and the lookup waits until each one that applies is answered.
+  const q = updateQuestions();
+  const flag = id => { $(id).classList.add("missing"); $(id).scrollIntoView({ behavior: "smooth", block: "center" }); };
+  if (q.needGlass && !formGlass) { flag("qGlass"); return showError("Choose which glass your quote is for. Pick \"Not sure\" if you don't know."); }
+  if (q.needAdas && formAdas === null) { flag("qAdas"); return showError("Tell us whether your vehicle has these safety features. Tap \"Not sure?\" for help."); }
+
   const vehicle = { year, make, model, body: body || "car" };
-  const status = adasStatus(make, year, model);
-  current = { vehicle, service, zip, local, status, hasCamera: service === "windshield" && status === "likely", oem: false, place: local.state };
+  const status = q.status || adasStatus(make, year, model);
+  const hasCamera = service === "windshield" && (q.needAdas ? formAdas : status === "likely");
+  current = { vehicle, service, zip, local, status, hasCamera, oem: q.needGlass && formGlass === "oem",
+    glassUnsure: q.needGlass && formGlass === "unsure", place: local.state };
   render();
   els.results.hidden = false;
   els.results.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -755,6 +872,7 @@ $("adasNo").addEventListener("click", () => setCamera(false));
 function setOem(val) {
   if (!current) return;
   current.oem = val;
+  current.glassUnsure = false;
   render();
 }
 $("glassAfter").addEventListener("click", () => setOem(false));
@@ -779,16 +897,16 @@ function render() {
   if (showGlass) {
     $("glassAfter").setAttribute("aria-pressed", String(!c.oem));
     $("glassOem").setAttribute("aria-pressed", String(c.oem));
-    $("glassHelp").textContent = "Most shops quote aftermarket glass, made to the same fit by another manufacturer. Genuine glass carries the " + v.make + " logo and costs more. Not sure? Ask your shop.";
+    $("glassHelp").textContent = c.glassUnsure
+      ? "You weren't sure, so this assumes aftermarket glass, which is what most shops quote. Switch to compare."
+      : "Switch to compare prices for each glass type.";
   }
   if (showAdas) {
     $("adasYes").setAttribute("aria-pressed", String(c.hasCamera));
     $("adasNo").setAttribute("aria-pressed", String(!c.hasCamera));
     $("adasHelp").textContent = SELF_CALIBRATING.includes(v.make)
       ? v.make + " cameras recalibrate themselves as you drive, so there is usually no separate recalibration charge."
-      : c.status === "likely"
-      ? "Most " + v.year + " " + v.make + " models have one for lane-keep or automatic braking. It has to be recalibrated after a new windshield, so we've included that."
-      : "Some " + v.year + " " + v.make + " trims have one for lane-keep or automatic braking. To check, look from outside for a black housing behind the mirror.";
+      : "Lane keeping, automatic braking, adaptive cruise, or automatic high beams. Switch to compare prices with and without camera recalibration.";
   }
 
   $("pGreat").innerHTML = "<small>Under</small> " + money(est.great);
@@ -802,7 +920,7 @@ function render() {
 
   // What the price includes (kept next to the prices so it shows in screenshots)
   const inc = [];
-  if (isGlass) inc.push((c.oem || tier === "exotic" ? "genuine " + v.make : "aftermarket") + " glass", "installation");
+  if (isGlass) inc.push((c.oem || tier === "exotic" ? "genuine " + v.make : "aftermarket") + " glass" + (c.glassUnsure ? " (assumed)" : ""), "installation");
   if (c.service === "chip") inc.push("repair of one chip");
   if (est.hasCal || c.service === "adas") inc.push("camera recalibration");
   $("inclLine").innerHTML = "<b>Includes:</b> " + inc.join(", ") + ". <b>Not included:</b> sales tax" +
@@ -813,7 +931,7 @@ function render() {
   const notes = [];
   if (showAdas && !c.hasCamera) {
     const alt = estimate(c.service, v, c.local, true, c.oem);
-    notes.push("<p><b>Not sure about the camera?</b> If your car has one, the typical price is about " + money(alt.mid) +
+    notes.push("<p><b>Not sure about the safety features?</b> If your car has them, the typical price is about " + money(alt.mid) +
       (alt.hasCal ? ", including recalibration" : "") + ".</p>");
   }
   if (est.hasCal) {
