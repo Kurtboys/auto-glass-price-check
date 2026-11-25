@@ -33,6 +33,17 @@ const CONFIG = {
   // true = texts and emails include a link that reopens the customer's results.
   shareLink: true,
 
+  // TRACKING. Every ID is empty, so nothing is sent anywhere yet.
+  // Fill in an ID to switch that destination on. If this page already loads the
+  // same tag (for example inside your website's template), leave the ID empty:
+  // the events below are picked up by the tag that is already there.
+  tracking: {
+    ga4Id: "",               // Google Analytics 4 measurement ID, like "G-XXXXXXXXXX"
+    googleAdsId: "",         // Google Ads tag ID, like "AW-1234567890"
+    googleAdsLeadLabel: "",  // Google Ads conversion label for a Text or Email tap
+    metaPixelId: ""          // Meta (Facebook) pixel ID
+  },
+
   // true = model dropdown filled from the federal NHTSA vehicle database.
   // false = visitors type their model (use only where outside lookups are blocked).
   liveModelList: true
@@ -646,6 +657,84 @@ function estimate(serviceKey, v, local, hasCamera, oem) {
    Page wiring
    --------------------------------------------------------------------- */
 const $ = id => document.getElementById(id);
+
+/* ---------------------------------------------------------------------
+   Tracking
+   Where the visitor came from is read from the page address:
+     Google Ads click (gclid)                    -> "google-ads"
+     Meta ad click (fbclid)                      -> "meta-ads"
+     utm_source / utm_medium on any link         -> for example "facebook-paid"
+     ?src=anything on a link you control         -> for example "get-a-quote"
+     none of these                               -> "direct"
+   That label rides along on every event and in the text or email.
+   --------------------------------------------------------------------- */
+const SOURCE = (() => {
+  const q = new URLSearchParams(location.search);
+  let src = "";
+  if (q.get("gclid") || q.get("gbraid") || q.get("wbraid")) src = "google-ads";
+  else if (q.get("fbclid")) src = "meta-ads";
+  else if (q.get("utm_source")) src = q.get("utm_source") + (q.get("utm_medium") ? "-" + q.get("utm_medium") : "");
+  else if (q.get("src")) src = q.get("src");
+  src = src.toLowerCase().replace(/[^a-z0-9-]/g, "").slice(0, 40);
+  try {
+    if (src) sessionStorage.setItem("pc_source", src);
+    else src = sessionStorage.getItem("pc_source") || "";
+  } catch (e) { /* storage unavailable: keep what the address gave us */ }
+  return src || "direct";
+})();
+
+// Loads only the tags whose IDs are filled in, and only if the page doesn't already have them.
+(function loadTags() {
+  const t = CONFIG.tracking || {};
+  const googleIds = [t.ga4Id, t.googleAdsId].filter(Boolean);
+  if (googleIds.length && typeof window.gtag !== "function") {
+    window.dataLayer = window.dataLayer || [];
+    window.gtag = function () { window.dataLayer.push(arguments); };
+    window.gtag("js", new Date());
+    googleIds.forEach(id => window.gtag("config", id));
+    const tag = document.createElement("script");
+    tag.async = true;
+    tag.src = "https://www.googletagmanager.com/gtag/js?id=" + encodeURIComponent(googleIds[0]);
+    document.head.appendChild(tag);
+  }
+  if (t.metaPixelId && typeof window.fbq !== "function") {
+    const fbq = window.fbq = function () { fbq.callMethod ? fbq.callMethod.apply(fbq, arguments) : fbq.queue.push(arguments); };
+    if (!window._fbq) window._fbq = fbq;
+    fbq.push = fbq; fbq.loaded = true; fbq.version = "2.0"; fbq.queue = [];
+    const tag = document.createElement("script");
+    tag.async = true;
+    tag.src = "https://connect.facebook.net/en_US/fbevents.js";
+    document.head.appendChild(tag);
+    fbq("init", t.metaPixelId);
+    fbq("track", "PageView");
+  }
+})();
+
+// Sends one event to whichever tags are on the page. With no tags, it only fills dataLayer.
+function track(name, params) {
+  const data = Object.assign({ lead_source: SOURCE }, params || {});
+  window.dataLayer = window.dataLayer || [];
+  window.dataLayer.push(Object.assign({ event: name }, data));
+  if (typeof window.gtag === "function") window.gtag("event", name, data);
+  if (typeof window.fbq === "function") {
+    if (name === "generate_lead") window.fbq("track", "Lead", data);
+    else if (name === "price_check") window.fbq("trackCustom", "PriceCheck", data);
+  }
+  const t = CONFIG.tracking || {};
+  if (name === "generate_lead" && t.googleAdsId && t.googleAdsLeadLabel && typeof window.gtag === "function") {
+    window.gtag("event", "conversion", { send_to: t.googleAdsId + "/" + t.googleAdsLeadLabel });
+  }
+}
+// The lookup details attached to an event. No names, phone numbers, or emails.
+function lookupParams(c) {
+  if (!c) return {};
+  return {
+    service: c.service, vehicle_year: c.vehicle.year, vehicle_make: c.vehicle.make, vehicle_model: c.vehicle.model, zip: c.zip,
+    glass: GLASS_SERVICES.includes(c.service) ? (c.oem ? "oem" : "aftermarket") : "na",
+    adas: c.service === "windshield" ? (c.hasCamera ? "yes" : "no") : "na",
+    typical_price: estimate(c.service, c.vehicle, c.local, c.hasCamera, c.oem).mid
+  };
+}
 const els = {
   form: $("form"), year: $("year"), make: $("make"), model: $("model"), modelText: $("modelText"),
   modelHint: $("modelHint"), bodyWrap: $("bodyWrap"), body: $("body"), service: $("service"), zip: $("zip"),
@@ -796,6 +885,7 @@ $("adasHelpBtn").addEventListener("click", () => {
   panel.hidden = !open;
   $("adasHelpBtn").setAttribute("aria-expanded", String(open));
   $("adasHelpBtn").textContent = open ? "Hide the pictures" : "Not sure? See what to look for";
+  if (open) track("adas_help_open");
 });
 
 els.year.addEventListener("change", () => { loadModels(); vehicleChanged(); });
@@ -852,6 +942,7 @@ els.form.addEventListener("submit", e => {
   els.results.hidden = false;
   els.results.scrollIntoView({ behavior: "smooth", block: "start" });
   lookupPlace(current);
+  track("price_check", lookupParams(current));
 });
 
 // City name for the zip (display only; prices never depend on this call)
@@ -962,7 +1053,8 @@ function render() {
   // Text and email, pre-filled with everything the visitor entered and the prices they saw
   const lines = lookupSummary(c, est);
   const link = shareUrl(c);
-  lastSummary = "Hi, I'd like the All-Star price for my vehicle.\n\n" + lines.join("\n") + (link ? "\n\nMy results: " + link : "");
+  lastSummary = "Hi, I'd like the All-Star price for my vehicle.\n\n" + lines.join("\n") +
+    (SOURCE !== "direct" ? "\nRef: " + SOURCE : "") + (link ? "\n\nMy results: " + link : "");
   $("textBtn").href = "sms:" + CONFIG.phoneDial + "?&body=" + encodeURIComponent(lastSummary);
   $("emailBtn").href = "mailto:" + CONFIG.email +
     "?subject=" + encodeURIComponent("Price request: " + v.year + " " + v.make + " " + v.model + ", " + s.label.toLowerCase()) +
@@ -987,10 +1079,12 @@ function shareUrl(c) {
   const q = new URLSearchParams({ y: v.year, mk: v.make, md: v.model, b: v.body, s: c.service, z: c.zip });
   if (GLASS_SERVICES.includes(c.service)) q.set("g", c.oem ? "oem" : "am");
   if (c.service === "windshield") q.set("a", c.hasCamera ? "1" : "0");
+  q.set("src", "shared");
   return location.origin + location.pathname + "?" + q.toString();
 }
 $("copyBtn").addEventListener("click", async () => {
   const done = () => { $("copyBtn").textContent = "Copied"; setTimeout(() => { $("copyBtn").textContent = "Copy my results"; }, 2000); };
+  track("copy_results", lookupParams(current));
   try { await navigator.clipboard.writeText(lastSummary); done(); }
   catch (e) {
     const t = document.createElement("textarea");
@@ -1000,6 +1094,11 @@ $("copyBtn").addEventListener("click", async () => {
     t.remove();
   }
 });
+
+// A tap on Text or Email is the lead. The tap is all a web page can see; the message itself is sent from the visitor's own app.
+$("textBtn").addEventListener("click", () => track("generate_lead", Object.assign({ method: "text", placement: "results" }, lookupParams(current))));
+$("emailBtn").addEventListener("click", () => track("generate_lead", Object.assign({ method: "email", placement: "results" }, lookupParams(current))));
+$("headPhone").addEventListener("click", () => track("generate_lead", Object.assign({ method: "text", placement: "header" }, lookupParams(current))));
 
 // Opening a results link from a text or email shows that lookup right away.
 (function openSharedLookup() {
@@ -1025,6 +1124,7 @@ $("copyBtn").addEventListener("click", async () => {
   render();
   els.results.hidden = false;
   lookupPlace(current);
+  track("shared_link_open", lookupParams(current));
 })();
 </script>
 </body>
